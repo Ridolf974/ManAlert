@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Pulse">
+<meta name="theme-color" content="#1a1a1a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyChCsw7FTECYVmsEGG4O6iowDMoSgJdiCg",
+    authDomain: "pulse-dialyse.firebaseapp.com",
+    databaseURL: "https://pulse-dialyse-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "pulse-dialyse",
+    storageBucket: "pulse-dialyse.firebasestorage.app",
+    messagingSenderId: "617504338844",
+    appId: "1:617504338844:web:e0b9d9781a2b66498a4e59"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Module Firebase v10 chargé (SDK compat utilisé pour auth+db)
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<title>Pulse</title>
+<style>
+/* ============================================================
+   DESIGN SYSTEM — Moderne & Coloré
+   Palette : Electric Indigo + Coral + Mint sur fond slate
+   Typo : DM Sans (corps) + Syne (titres)
+============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@600;700;800&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+
+:root{
+  /* Couleurs principales */
+  --indigo:#5B4FE9;
+  --indigo-light:#7B72F0;
+  --indigo-dim:#EEF0FF;
+  --coral:#FF5F5F;
+  --coral-dim:#FFF0F0;
+  --mint:#1DB88A;
+  --mint-dim:#E8FBF4;
+  --amber:#F59E0B;
+  --amber-dim:#FFFBEB;
+
+  /* Fond & surfaces */
+  --bg:#F4F5FF;
+  --surface:#FFFFFF;
+  --surface2:#F0F1FA;
+
+  /* Texte */
+  --text:#1A1830;
+  --text2:#5A5878;
+  --text3:#9896B0;
+
+  /* Bordures */
+  --border:rgba(91,79,233,0.12);
+  --border2:rgba(91,79,233,0.25);
+
+  /* Ombres */
+  --shadow-sm:0 1px 4px rgba(91,79,233,0.08);
+
+  --radius:12px;
+  --radius-lg:18px;
+  --radius-xl:24px;
+}
+
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#0F0E1A;
+    --surface:#1C1A2E;
+    --surface2:#252340;
+    --text:#F0EFFF;
+    --text2:#9896B0;
+    --text3:#5A5878;
+    --border:rgba(91,79,233,0.2);
+    --border2:rgba(91,79,233,0.35);
+    --shadow-sm:0 1px 4px rgba(0,0,0,0.3);
+    --indigo-dim:#1E1C38;
+    --coral-dim:#2A1A1A;
+    --mint-dim:#0F2520;
+    --amber-dim:#2A2010;
+  }
+}
+
+html,body{
+  height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',system-ui,sans-serif;
+  font-size:15px;
+  line-height:1.5;
+}
+body{
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
+/* ── Layout ── */
+.screen{display:none;flex-direction:column;height:100vh;height:100dvh}
+.screen.active{display:flex}
+
+.navbar{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:14px 18px;
+  padding-top:calc(14px + env(safe-area-inset-top));
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+  box-shadow:var(--shadow-sm);
+}
+.navbar h1{
+  font-family:'Syne',sans-serif;
+  font-size:18px;font-weight:700;
+  color:var(--text);
+  letter-spacing:-0.3px;
+}
+
+.scroll-area{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:16px 16px calc(90px + env(safe-area-inset-bottom));
+  background:var(--bg);
+}
+
+/* ── Tab bar ── */
+.tabbar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  display:flex;
+  padding-bottom:env(safe-area-inset-bottom);
+  box-shadow:0 -4px 20px rgba(91,79,233,0.08);
+}
+.tabbar-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:10px 0 8px;gap:4px;
+  font-size:10px;font-weight:500;
+  color:var(--text3);
+  background:transparent;border:none;cursor:pointer;
+  transition:all .2s;
+  letter-spacing:0.2px;
+}
+.tabbar-btn.active{color:var(--indigo)}
+.tabbar-btn.active .tabbar-icon-wrap{
+  background:var(--indigo-dim);
+  transform:translateY(-2px);
+}
+.tabbar-icon-wrap{
+  width:36px;height:36px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.tabbar-icon{font-size:20px;line-height:1}
+
+/* ── Stats bar ── */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat{
+  background:var(--surface);
+  border-radius:var(--radius-lg);
+  padding:14px 16px;
+  box-shadow:var(--shadow-sm);
+  border:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.stat::before{
+  content:'';position:absolute;top:0;right:0;
+  width:60px;height:60px;border-radius:50%;
+  background:var(--indigo-dim);
+  transform:translate(20px,-20px);
+}
+.stat-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.stat-value{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;line-height:1}
+
+/* ── Filters ── */
+.filters{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.filters::-webkit-scrollbar{display:none}
+.filter-chip{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:7px 14px;
+  font-size:12px;font-weight:600;
+  color:var(--text2);
+  cursor:pointer;white-space:nowrap;
+  transition:all .2s;flex-shrink:0;
+  letter-spacing:0.1px;
+}
+.filter-chip.active{
+  background:var(--indigo);
+  color:#fff;
+  border-color:var(--indigo);
+  box-shadow:0 2px 8px rgba(91,79,233,0.3);
+}
+
+/* ── Toggle résolus ── */
+.toggle-resolus{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:12px;
+  font-size:13px;font-weight:500;color:var(--text2);
+  cursor:pointer;user-select:none;
+}
+.toggle-resolus input[type=checkbox]{
+  width:16px;height:16px;accent-color:var(--indigo);cursor:pointer;
+}
+
+/* ── Cards ── */
+.icard{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:16px;
+  margin-bottom:12px;
+  box-shadow:var(--shadow-sm);
+  transition:box-shadow .2s, transform .15s;
+  position:relative;
+}
+.icard:active{transform:scale(0.99)}
+.icard.resolved{opacity:.5;filter:grayscale(0.3)}
+.icard.souffrance{border-left:4px solid var(--amber)}
+
+/* ── Badges ── */
+.badge{
+  display:inline-flex;align-items:center;
+  padding:3px 9px;border-radius:20px;
+  font-size:10px;font-weight:700;
+  white-space:nowrap;letter-spacing:0.3px;
+  text-transform:uppercase;
+}
+.b-critique{background:#FFE8E8;color:#C0392B}
+.b-modere{background:#FFF3CD;color:#9A6700}
+.b-mineur{background:#E8F4FF;color:#1A6FA8}
+.b-ouvert{background:var(--surface2);color:var(--text2)}
+.b-encours{background:#EEEDFE;color:#4B44C4}
+.b-resolu{background:#E8FAF2;color:#1A7A52}
+.b-rh{background:#FDE8F0;color:#A3245A}
+.b-orga{background:#FFF3CD;color:#9A6700}
+.b-planning{background:#E0F7EF;color:#0F6347}
+
+/* Badge souffrance */
+.badge-souffrance{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:3px 9px;border-radius:20px;
+  font-size:10px;font-weight:700;
+  background:var(--amber-dim);color:var(--amber);
+  white-space:nowrap;letter-spacing:0.2px;
+}
+
+.ihead{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.ititle{font-size:15px;font-weight:600;color:var(--text);flex:1;line-height:1.35;letter-spacing:-0.1px}
+.ibadges{display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.imeta{font-size:12px;color:var(--text3);margin-bottom:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.imeta-chip{
+  background:var(--surface2);
+  border-radius:6px;padding:2px 7px;
+  font-size:11px;font-weight:500;color:var(--text2);
+}
+.idesc{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:8px}
+.iactions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+
+/* ── Boutons ── */
+.btn-action{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:8px 14px;font-size:13px;
+  cursor:pointer;color:var(--text);font-weight:600;
+  transition:all .15s;letter-spacing:0.1px;
+}
+.btn-action:active{opacity:.7;transform:scale(0.97)}
+.btn-action.ok{color:var(--mint);border-color:rgba(29,184,138,0.3);background:var(--mint-dim)}
+.btn-action.danger{color:var(--coral);border-color:rgba(255,95,95,0.3);background:var(--coral-dim)}
+.btn-action.primary{background:var(--indigo);color:#fff;border-color:var(--indigo);box-shadow:0 2px 8px rgba(91,79,233,0.3)}
+.btn-action.primary:active{box-shadow:none}
+
+/* ── Section étendue ── */
+.exp-block{border-top:1px solid var(--border);padding-top:12px;margin-top:12px}
+.note{
+  font-size:12px;color:var(--text2);
+  padding:8px 10px;
+  background:var(--surface2);
+  border-radius:10px;margin-bottom:6px;line-height:1.5;
+  border-left:3px solid var(--indigo-dim);
+}
+.note-date{color:var(--text3);font-size:11px;font-weight:600}
+.add-note{display:flex;gap:8px;margin-top:10px}
+.add-note input{
+  flex:1;font-size:13px;
+  padding:9px 12px;
+  border:1px solid var(--border2);
+  border-radius:10px;
+  background:var(--surface);color:var(--text);
+  font-family:inherit;
+  transition:border-color .2s;
+}
+.add-note input:focus{outline:none;border-color:var(--indigo)}
+.btn-hide-bottom{
+  display:flex;align-items:center;justify-content:center;gap:4px;
+  margin-top:12px;width:100%;padding:9px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;font-size:13px;font-weight:500;
+  color:var(--text2);cursor:pointer;
+  transition:all .15s;
+}
+
+/* ── Résolution ── */
+.resolution-banner{
+  background:var(--mint-dim);
+  border:1px solid rgba(29,184,138,0.25);
+  border-radius:var(--radius);padding:12px 14px;margin-top:10px;
+}
+.resolution-banner-label{font-size:11px;font-weight:700;color:var(--mint);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.4px}
+.resolution-banner-text{font-size:13px;color:var(--text2);line-height:1.5}
+.resolution-banner-date{font-size:11px;color:var(--mint);margin-top:3px;font-weight:500}
+
+.resolve-prompt{
+  background:var(--mint-dim);
+  border:1px solid rgba(29,184,138,0.25);
+  border-radius:var(--radius);padding:14px;margin-top:10px;
+}
+.resolve-prompt p{font-size:13px;color:var(--text);font-weight:600;margin-bottom:10px}
+.resolve-prompt textarea{
+  width:100%;font-size:13px;
+  padding:10px 12px;
+  border:1px solid rgba(29,184,138,0.3);
+  border-radius:10px;
+  background:var(--surface);color:var(--text);
+  min-height:80px;resize:none;line-height:1.5;
+  font-family:inherit;transition:border-color .2s;
+}
+.resolve-prompt textarea:focus{outline:none;border-color:var(--mint)}
+.resolve-prompt-actions{display:flex;gap:8px;margin-top:10px}
+
+.reformule-block{
+  background:var(--surface);
+  border:1px solid rgba(29,184,138,0.3);
+  border-radius:10px;padding:12px;margin-top:10px;display:none;
+}
+.reformule-label{font-size:10px;font-weight:700;color:var(--mint);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+.reformule-text{font-size:13px;color:var(--text2);line-height:1.6;white-space:pre-wrap}
+.reformule-actions{display:flex;gap:8px;margin-top:10px}
+.btn-reformuler{
+  background:var(--surface);color:var(--mint);
+  border:1px solid rgba(29,184,138,0.3);
+  border-radius:10px;padding:8px 14px;
+  font-size:13px;font-weight:600;cursor:pointer;
+  transition:all .15s;font-family:inherit;
+}
+.btn-reformuler:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Suggestions RH ── */
+.rh-wrap{margin-top:12px;border-top:1px solid rgba(163,36,90,0.15);padding-top:12px}
+.rh-head{font-size:11px;font-weight:700;color:#A3245A;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.rh-card{
+  background:#FDE8F0;border:1px solid rgba(163,36,90,0.15);
+  border-radius:var(--radius);padding:10px 12px;margin-bottom:8px;
+}
+.rh-card-label{font-size:11px;font-weight:700;color:#7B1245;margin-bottom:4px}
+.rh-card-text{font-size:12px;color:#5A0F2E;line-height:1.55}
+.rh-loading{font-size:12px;color:#A3245A;font-style:italic}
+
+/* ── Formulaires ── */
+.form-scroll{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:18px 16px calc(110px + env(safe-area-inset-bottom));
+  background:var(--bg);
+}
+.form-section{
+  background:var(--surface);
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+  margin-bottom:14px;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+}
+.form-row{
+  display:flex;flex-direction:column;
+  padding:13px 16px;
+  border-bottom:1px solid var(--border);
+}
+.form-row:last-child{border-bottom:none}
+.form-label{
+  font-size:10px;font-weight:700;color:var(--indigo);
+  margin-bottom:5px;text-transform:uppercase;letter-spacing:0.6px;
+}
+.form-input{
+  font-size:15px;background:transparent;border:none;outline:none;
+  color:var(--text);width:100%;font-family:inherit;
+}
+.form-input::placeholder{color:var(--text3)}
+textarea.form-input{resize:none;min-height:72px;line-height:1.5}
+.form-select{
+  font-size:15px;background:transparent;border:none;outline:none;
+  color:var(--text);width:100%;font-family:inherit;-webkit-appearance:none;
+}
+.form-select option{background:var(--surface);color:var(--text)}
+.rh-hint-form{
+  background:var(--coral-dim);border:1px solid rgba(255,95,95,0.2);
+  border-radius:var(--radius);padding:10px 14px;
+  margin-bottom:14px;font-size:13px;color:var(--coral);display:none;
+  font-weight:500;
+}
+
+/* ── Boutons principaux ── */
+.btn-submit{
+  width:100%;
+  background:var(--indigo);color:#fff;border:none;
+  border-radius:var(--radius-lg);padding:16px;
+  font-size:16px;font-weight:700;
+  cursor:pointer;margin-bottom:10px;
+  font-family:'Syne',sans-serif;letter-spacing:0.2px;
+  box-shadow:0 4px 14px rgba(91,79,233,0.35);
+  transition:all .2s;
+}
+.btn-submit:active{opacity:.85;transform:scale(0.98);box-shadow:none}
+.btn-cancel{
+  width:100%;
+  background:var(--surface2);color:var(--text2);border:none;
+  border-radius:var(--radius-lg);padding:16px;
+  font-size:15px;font-weight:600;cursor:pointer;
+  font-family:inherit;transition:all .15s;
+}
+
+/* ── Empty state ── */
+.empty{text-align:center;padding:48px 20px;color:var(--text2);font-size:15px}
+.empty-icon{font-size:44px;margin-bottom:14px}
+
+/* ── Analyse ── */
+.kpis-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.kpi-card{
+  background:var(--surface);border-radius:var(--radius-lg);padding:14px 16px;
+  border:1px solid var(--border);box-shadow:var(--shadow-sm);
+  position:relative;overflow:hidden;
+}
+.kpi-card::after{
+  content:'';position:absolute;bottom:0;right:0;
+  width:50px;height:50px;border-radius:50%;
+  background:var(--indigo-dim);
+  transform:translate(15px,15px);
+}
+.kpi-label{font-size:10px;font-weight:700;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
+.kpi-value{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--text);line-height:1}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:3px;font-weight:500}
+
+.chart-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;
+  box-shadow:var(--shadow-sm);
+}
+.chart-title{
+  font-family:'Syne',sans-serif;
+  font-size:14px;font-weight:700;color:var(--text);
+  margin-bottom:12px;letter-spacing:-0.1px;
+}
+.legend-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;font-size:12px;color:var(--text2)}
+.legend-row span{display:flex;align-items:center;gap:5px;font-weight:500}
+.ldot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.bar-label{font-size:12px;font-weight:500;color:var(--text2);width:70px;flex-shrink:0;text-align:right}
+.bar-track{flex:1;background:var(--surface2);border-radius:6px;height:24px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:11px;font-weight:700}
+.bar-pct{font-size:12px;font-weight:600;color:var(--text2);width:36px;text-align:right}
+.delai-table{width:100%;border-collapse:collapse;font-size:13px}
+.delai-table th{font-size:10px;font-weight:700;color:var(--text3);text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:0.4px}
+.delai-table td{padding:10px 8px;border-bottom:1px solid var(--border);color:var(--text);font-weight:500}
+.delai-table tr:last-child td{border-bottom:none}
+.empty-analyse{text-align:center;padding:40px 20px;color:var(--text2);font-size:14px}
+
+/* ── Bilan ── */
+.bilan-form{
+  background:var(--surface);border-radius:var(--radius-lg);
+  padding:16px;margin-bottom:16px;
+  border:1px solid var(--border);box-shadow:var(--shadow-sm);
+}
+.bilan-form-title{
+  font-family:'Syne',sans-serif;
+  font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px;
+}
+.bilan-dates{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.bilan-dates label{font-size:10px;font-weight:700;color:var(--indigo);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px}
+.bilan-dates input[type=date]{
+  font-size:14px;padding:9px 12px;
+  border:1px solid var(--border2);border-radius:10px;
+  background:var(--surface);color:var(--text);width:100%;
+  font-family:inherit;transition:border-color .2s;
+}
+.bilan-dates input[type=date]:focus{outline:none;border-color:var(--indigo)}
+.bilan-date-group{flex:1;min-width:120px}
+.btn-bilan{
+  width:100%;background:var(--indigo);color:#fff;border:none;
+  border-radius:var(--radius);padding:12px;
+  font-size:15px;font-weight:700;cursor:pointer;
+  font-family:'Syne',sans-serif;
+  box-shadow:0 3px 10px rgba(91,79,233,0.3);
+  transition:all .2s;
+}
+.btn-bilan:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.btn-bilan:active:not(:disabled){opacity:.85;transform:scale(0.98)}
+.btn-export{
+  width:100%;background:var(--mint-dim);color:var(--mint);
+  border:1px solid rgba(29,184,138,0.3);
+  border-radius:var(--radius);padding:12px;
+  font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;
+  transition:all .2s;font-family:inherit;
+}
+.btn-export:active{opacity:.8}
+.bilan-error{color:var(--coral);font-size:13px;margin-top:6px;display:none;font-weight:500}
+.bilan-result{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.secteur-table{width:100%;border-collapse:collapse;font-size:13px}
+.secteur-table th{font-size:10px;font-weight:700;color:var(--text3);text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:0.4px}
+.secteur-table td{padding:10px 8px;border-bottom:1px solid var(--border);color:var(--text);font-weight:500}
+.secteur-table tr:last-child td{border-bottom:none}
+.secteur-bar{height:6px;border-radius:3px;background:var(--indigo);display:inline-block;vertical-align:middle;margin-left:4px}
+
+/* ── Modale suppression ── */
+.modal-overlay{
+  position:fixed;inset:0;
+  background:rgba(15,14,26,0.6);
+  backdrop-filter:blur(4px);
+  z-index:1000;
+  display:flex;align-items:flex-end;justify-content:center;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.modal-box{
+  background:var(--surface);
+  border-radius:var(--radius-xl) var(--radius-xl) 0 0;
+  width:100%;max-width:480px;
+  padding:24px 20px calc(24px + env(safe-area-inset-bottom));
+  animation:slideUp .25s cubic-bezier(0.34,1.56,0.64,1);
+  border-top:1px solid var(--border);
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{
+  font-family:'Syne',sans-serif;
+  font-size:18px;font-weight:700;color:var(--text);
+  margin-bottom:8px;text-align:center;
+}
+.modal-msg{font-size:13px;color:var(--text2);text-align:center;margin-bottom:20px;line-height:1.55}
+.modal-actions{display:flex;flex-direction:column;gap:10px}
+.modal-overlay.hidden{display:none}
+
+/* ── Print / PDF ── */
+@media print{
+  body{background:#fff!important;color:#1a1a1a!important;font-family:sans-serif}
+  .no-print,.tabbar,.navbar,.btn-bilan,.btn-export,.bilan-form{display:none!important}
+  .screen{display:block!important;height:auto!important}
+  .screen:not(#screen-analyse){display:none!important}
+  .scroll-area{overflow:visible!important;padding:0!important}
+  .kpis-grid{display:grid!important;grid-template-columns:1fr 1fr 1fr 1fr!important;gap:8px!important;margin-bottom:16px!important}
+  .kpi-card,.chart-card{border:1px solid #ddd!important;border-radius:8px!important;padding:12px!important;background:#fff!important;box-shadow:none!important;page-break-inside:avoid}
+  .kpi-value{font-size:22px!important;font-weight:700!important;color:#1a1a1a!important}
+  .bar-fill{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .badge{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .pdf-header{display:block!important}
+  .bilan-result{display:block!important}
+  canvas{max-width:100%!important}
+}
+</style>
+</head>
+<body>
+
+<!-- CONFIG -->
+<div class="screen" id="screen-config">
+  <div class="navbar"><h1 style="display:flex;align-items:center;gap:8px"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+  <rect width="28" height="28" rx="8" fill="#5B4FE9"/>
+  <polyline points="3,14 8,14 10,8 12,20 15,5 17,19 19,12 25,12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg> Configuration</h1></div>
+  <div class="form-scroll">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
+      Pour activer l'analyse intelligente et les suggestions dans Pulse, saisissez votre clé API Anthropic. Elle est stockée uniquement sur votre téléphone.
+    </div>
+    <div class="form-section">
+      <div class="form-row">
+        <div class="form-label">Clé API Anthropic</div>
+        <input class="form-input" id="config-apikey" type="password" placeholder="sk-ant-...">
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:20px;line-height:1.5">
+      Obtenez votre clé sur console.anthropic.com → API Keys. Elle commence par sk-ant-
+    </div>
+    <button class="btn-submit" onclick="saveApiKey()">Enregistrer et continuer</button>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="screen" id="screen-login">
+  <div class="navbar"><h1 style="display:flex;align-items:center;gap:8px"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+  <rect width="28" height="28" rx="8" fill="#5B4FE9"/>
+  <polyline points="3,14 8,14 10,8 12,20 15,5 17,19 19,12 25,12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg> Pulse</h1></div>
+  <div class="form-scroll">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
+      Connectez-vous pour accéder à Pulse.
+    </div>
+    <div class="form-section">
+      <div class="form-row">
+        <div class="form-label">Email</div>
+        <input class="form-input" id="login-email" type="email" placeholder="votre@email.com" autocomplete="email">
+      </div>
+      <div class="form-row">
+        <div class="form-label">Mot de passe</div>
+        <input class="form-input" id="login-pwd" type="password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+    </div>
+    <div id="login-error" style="color:#A32D2D;font-size:13px;margin-bottom:12px;display:none"></div>
+    <button class="btn-submit" id="btn-login" onclick="doLogin()">Se connecter</button>
+    <div style="text-align:center;margin-top:12px">
+      <button onclick="showRegister()" style="background:transparent;border:none;color:var(--text2);font-size:13px;cursor:pointer;text-decoration:underline">Créer un compte</button>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div class="screen" id="screen-register">
+  <div class="navbar">
+    <button class="btn-action" onclick="showLogin()" style="font-size:13px;font-weight:600;padding:7px 12px">← Retour</button>
+    <h1>Créer un compte</h1>
+    <div style="width:70px"></div>
+  </div>
+  <div class="form-scroll">
+    <div class="form-section">
+      <div class="form-row">
+        <div class="form-label">Email</div>
+        <input class="form-input" id="reg-email" type="email" placeholder="votre@email.com">
+      </div>
+      <div class="form-row">
+        <div class="form-label">Mot de passe</div>
+        <input class="form-input" id="reg-pwd" type="password" placeholder="Min. 6 caractères">
+      </div>
+    </div>
+    <div id="reg-error" style="color:#A32D2D;font-size:13px;margin-bottom:12px;display:none"></div>
+    <button class="btn-submit" id="btn-register" onclick="doRegister()">Créer le compte</button>
+  </div>
+</div>
+
+<!-- LISTE -->
+<div class="screen active" id="screen-liste">
+  <div class="navbar">
+    <h1 style="display:flex;align-items:center;gap:8px">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+  <rect width="28" height="28" rx="8" fill="#5B4FE9"/>
+  <polyline points="3,14 8,14 10,8 12,20 15,5 17,19 19,12 25,12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
+      Pulse
+    </h1>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button onclick="doLogout()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;color:var(--text2);padding:7px 9px;line-height:1;display:inline-flex;align-items:center;justify-content:center" title="Déconnexion"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="7" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  <path d="M4 7V4.5C4 2.567 5.567 1 7.5 1H8.5C10.433 1 12 2.567 12 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <circle cx="8" cy="11.5" r="1.2" fill="currentColor"/>
+</svg></button>
+      <button onclick="goTo('config')" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:16px;cursor:pointer;color:var(--text2);padding:6px 8px;line-height:1">⚙️</button>
+      <button class="btn-action primary" style="padding:7px 14px;font-size:14px" onclick="goTo('nouveau')">+ Nouvelle</button>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div class="stats" id="stats-bar"></div>
+    <div class="filters" id="filter-bar">
+      <button class="filter-chip active" data-filter="statut" data-val="" onclick="setFilter(this,'statut')">Tous</button>
+      <button class="filter-chip" data-filter="statut" data-val="Ouvert" onclick="setFilter(this,'statut')">Ouverts</button>
+      <button class="filter-chip" data-filter="statut" data-val="En cours" onclick="setFilter(this,'statut')">En cours</button>
+      <button class="filter-chip" data-filter="statut" data-val="Résolu" onclick="setFilter(this,'statut')">Résolus</button>
+      <button class="filter-chip" data-filter="cat" data-val="Ressources Humaines" onclick="setFilter(this,'cat')">RH</button>
+      <button class="filter-chip" data-filter="cat" data-val="Organisation / Process" onclick="setFilter(this,'cat')">Organisation</button>
+      <button class="filter-chip" data-filter="cat" data-val="Planning" onclick="setFilter(this,'cat')">Planning</button>
+    </div>
+    <label class="toggle-resolus" id="toggle-resolus-label">
+      <input type="checkbox" id="toggle-resolus-cb" onchange="toggleMasquerResolus(this)">
+      Masquer les résolus
+    </label>
+    <div id="issues-list"></div>
+  </div>
+  <div class="tabbar">
+    <button class="tabbar-btn active" onclick="goTo('liste')"><div class="tabbar-icon-wrap"><span class="tabbar-icon">📋</span></div>Liste</button>
+    <button class="tabbar-btn" onclick="goTo('nouveau')"><div class="tabbar-icon-wrap"><span class="tabbar-icon">＋</span></div>Nouvelle</button>
+    <button class="tabbar-btn" onclick="goTo('analyse')"><div class="tabbar-icon-wrap"><span class="tabbar-icon">📊</span></div>Analyse</button>
+  </div>
+</div>
+
+<!-- ANALYSE -->
+<div class="screen" id="screen-analyse">
+  <div class="navbar">
+    <h1 style="display:flex;align-items:center;gap:8px"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+  <rect width="28" height="28" rx="8" fill="#5B4FE9"/>
+  <polyline points="3,14 8,14 10,8 12,20 15,5 17,19 19,12 25,12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg> Analyse</h1>
+  </div>
+  <!-- Onglets internes -->
+  <div style="display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;padding:0 8px;gap:4px" class="no-print">
+    <button id="atab-global" onclick="switchAnalyseTab('global')" style="flex:1;padding:12px 4px;font-size:12px;font-weight:700;border:none;background:transparent;color:var(--indigo);border-bottom:2px solid var(--indigo);cursor:pointer;letter-spacing:0.2px;text-transform:uppercase">Vue générale</button>
+    <button id="atab-secteur" onclick="switchAnalyseTab('secteur')" style="flex:1;padding:12px 4px;font-size:12px;font-weight:700;border:none;background:transparent;color:var(--text3);border-bottom:2px solid transparent;cursor:pointer;letter-spacing:0.2px;text-transform:uppercase">Par secteur</button>
+    <button id="atab-bilan" onclick="switchAnalyseTab('bilan')" style="flex:1;padding:12px 4px;font-size:12px;font-weight:700;border:none;background:transparent;color:var(--text3);border-bottom:2px solid transparent;cursor:pointer;letter-spacing:0.2px;text-transform:uppercase">Bilan</button>
+  </div>
+  <div class="scroll-area">
+    <!-- Vue générale -->
+    <div id="analyse-tab-global">
+      <div id="analyse-content"></div>
+    </div>
+    <!-- Par secteur -->
+    <div id="analyse-tab-secteur" style="display:none">
+      <div id="analyse-secteur-content"></div>
+    </div>
+    <!-- Bilan date à date -->
+    <div id="analyse-tab-bilan" style="display:none">
+      <div class="bilan-form no-print">
+        <div class="bilan-form-title">📅 Bilan sur une période</div>
+        <div class="bilan-dates">
+          <div class="bilan-date-group">
+            <label>Du</label>
+            <input type="date" id="bilan-du">
+          </div>
+          <div style="padding-top:18px;color:var(--text3);font-size:13px">→</div>
+          <div class="bilan-date-group">
+            <label>Au</label>
+            <input type="date" id="bilan-au">
+          </div>
+        </div>
+        <div id="bilan-error" class="bilan-error">Veuillez sélectionner une période valide (date de début ≤ date de fin).</div>
+        <button class="btn-bilan" id="btn-gen-bilan" onclick="genererBilan()">Générer le bilan</button>
+      </div>
+      <div id="bilan-result" style="display:none">
+        <div class="pdf-header" style="display:none;margin-bottom:16px;border-bottom:2px solid #007AFF;padding-bottom:10px">
+          <div style="font-size:18px;font-weight:700;color:#1a1a1a">Pulse — Bilan Centre de Dialyse</div>
+          <div id="pdf-periode" style="font-size:13px;color:#666;margin-top:4px"></div>
+          <div id="pdf-date-gen" style="font-size:11px;color:#999;margin-top:2px"></div>
+        </div>
+        <div id="bilan-content"></div>
+        <button class="btn-export no-print" onclick="exporterPDF()">⬇ Exporter en PDF</button>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar no-print">
+    <button class="tabbar-btn" onclick="goTo('liste')"><div class="tabbar-icon-wrap"><span class="tabbar-icon">📋</span></div>Liste</button>
+    <button class="tabbar-btn" onclick="goTo('nouveau')"><div class="tabbar-icon-wrap"><span class="tabbar-icon">＋</span></div>Nouvelle</button>
+    <button class="tabbar-btn active" onclick="goTo('analyse')"><div class="tabbar-icon-wrap"><span class="tabbar-icon">📊</span></div>Analyse</button>
+  </div>
+</div>
+
+<!-- NOUVELLE -->
+<div class="screen" id="screen-nouveau">
+  <div class="navbar">
+    <button class="btn-action" onclick="goTo('liste')" style="font-size:13px;font-weight:600;padding:7px 12px">← Retour</button>
+<h1>Nouvelle fiche</h1>
+    <div style="width:70px"></div>
+  </div>
+  <div class="form-scroll">
+    <div id="step-saisie">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.5">Décrivez librement la situation. Claude analysera et remplira la fiche automatiquement.</div>
+      <div class="form-section">
+        <div class="form-row">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div class="form-label" style="margin-bottom:0">Votre description</div>
+            <button id="btn-micro" onclick="toggleMicro()" style="background:var(--surface2);border:0.5px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px"><span style="font-size:14px">🎤</span> Dicter</button>
+          </div>
+          <textarea class="form-input" id="f-saisie-libre" rows="6" placeholder="Ex : Ce matin en secteur Ananas, deux soignantes se sont disputées devant les patients..."></textarea>
+        </div>
+      </div>
+      <button class="btn-submit" id="btn-analyser" onclick="analyserSaisie()">Analyser avec Claude</button>
+      <button class="btn-cancel" onclick="goTo('liste')">Annuler</button>
+    </div>
+    <div id="step-fiche" style="display:none">
+      <div id="analyse-loading" style="text-align:center;padding:30px;color:var(--text2);font-size:14px;display:none">Pulse analyse...</div>
+      <div id="fiche-editee">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.5">Fiche générée — vérifiez et modifiez avant d'enregistrer.</div>
+        <div class="form-section">
+          <div class="form-row">
+            <div class="form-label">Titre</div>
+            <input class="form-input" id="f-titre" type="text" placeholder="Titre">
+          </div>
+          <div class="form-row">
+            <div class="form-label">Description</div>
+            <textarea class="form-input" id="f-desc" placeholder="Description..."></textarea>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-row">
+            <div class="form-label">Catégorie</div>
+            <select class="form-select" id="f-cat" onchange="onCatChange()">
+              <option>Ressources Humaines</option>
+              <option>Organisation / Process</option>
+              <option>Planning</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-label">Priorité</div>
+            <select class="form-select" id="f-prio">
+              <option>Mineur</option><option>Modéré</option><option>Critique</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-label">Secteur</div>
+            <select class="form-select" id="f-sect">
+            <option value="Général">Général</option>
+            <option value="Coco">Coco</option>
+            <option value="Ananas">Ananas</option>
+            <option value="Letchis">Letchis</option>
+            <option value="Voyageur">Voyageur</option>
+            <option value="Extension">Extension</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-label">Date de début</div>
+            <input class="form-input" id="f-debut" type="date">
+          </div>
+          <div class="form-row">
+            <div class="form-label">Date cible</div>
+            <input class="form-input" id="f-fin" type="date">
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-row">
+            <div class="form-label">Première remarque</div>
+            <textarea class="form-input" id="f-note" placeholder="Actions prévues..."></textarea>
+          </div>
+        </div>
+        <div class="rh-hint-form" id="rh-hint">Catégorie RH sélectionnée — deux pistes de gestion seront générées automatiquement.</div>
+        <button class="btn-submit" onclick="saveIssue()">Enregistrer</button>
+        <button class="btn-cancel" onclick="retourSaisie()">← Modifier la saisie</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODIFIER -->
+<div class="screen" id="screen-modifier">
+  <div class="navbar">
+    <button class="btn-action" onclick="goTo('liste')" style="font-size:13px;font-weight:600;padding:7px 12px">← Retour</button>
+<h1>Modifier</h1>
+    <div style="width:70px"></div>
+  </div>
+  <div class="form-scroll">
+    <div class="form-section">
+      <div class="form-row">
+        <div class="form-label">Titre</div>
+        <input class="form-input" id="m-titre" type="text">
+      </div>
+      <div class="form-row">
+        <div class="form-label">Description</div>
+        <textarea class="form-input" id="m-desc"></textarea>
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="form-row">
+        <div class="form-label">Catégorie</div>
+        <select class="form-select" id="m-cat">
+          <option>Ressources Humaines</option>
+          <option>Organisation / Process</option>
+          <option>Planning</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Priorité</div>
+        <select class="form-select" id="m-prio">
+          <option>Mineur</option><option>Modéré</option><option>Critique</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Secteur</div>
+        <select class="form-select" id="m-sect">
+        <option value="Général">Général</option>
+        <option value="Coco">Coco</option>
+        <option value="Ananas">Ananas</option>
+        <option value="Letchis">Letchis</option>
+        <option value="Voyageur">Voyageur</option>
+        <option value="Extension">Extension</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-label">Date de début</div>
+        <input class="form-input" id="m-debut" type="date">
+      </div>
+      <div class="form-row">
+        <div class="form-label">Date cible</div>
+        <input class="form-input" id="m-fin" type="date">
+      </div>
+    </div>
+    <button class="btn-submit" onclick="saveModif()">Enregistrer les modifications</button>
+    <button class="btn-cancel" onclick="goTo('liste')">Annuler</button>
+  </div>
+</div>
+
+<script>
+const KEY='dialyse_v4';
+let issues=[];
+let exp={};
+let resolving={};
+let filters={statut:'',cat:''};
+let masquerResolus=false;
+let pendingDelId=null;
+let scrollPositions={};
+
+function toggleMasquerResolus(cb){
+  masquerResolus=cb.checked;
+  renderList();
+}
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyChCsw7FTECYVmsEGG4O6iowDMoSgJdiCg",
+  authDomain: "pulse-dialyse.firebaseapp.com",
+  databaseURL: "https://pulse-dialyse-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "pulse-dialyse",
+  storageBucket: "pulse-dialyse.firebasestorage.app",
+  messagingSenderId: "617504338844",
+  appId: "1:617504338844:web:e0b9d9781a2b66498a4e59"
+};
+
+let db = null;
+let fbRef = null;
+
+// ===== AUTHENTIFICATION =====
+function showLogin(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-login').classList.add('active');
+}
+function showRegister(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-register').classList.add('active');
+}
+
+function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pwd=document.getElementById('login-pwd').value;
+  const errEl=document.getElementById('login-error');
+  const btn=document.getElementById('btn-login');
+  if(!email||!pwd){errEl.textContent='Email et mot de passe requis.';errEl.style.display='block';return;}
+  btn.textContent='Connexion...';btn.disabled=true;
+  firebase.auth().signInWithEmailAndPassword(email,pwd)
+    .then(()=>{errEl.style.display='none';btn.textContent='Se connecter';btn.disabled=false;})
+    .catch(e=>{
+      errEl.textContent=e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Email ou mot de passe incorrect.':'Erreur : '+e.message;
+      errEl.style.display='block';
+      btn.textContent='Se connecter';btn.disabled=false;
+    });
+}
+
+function doRegister(){
+  const email=document.getElementById('reg-email').value.trim();
+  const pwd=document.getElementById('reg-pwd').value;
+  const errEl=document.getElementById('reg-error');
+  const btn=document.getElementById('btn-register');
+  if(!email||!pwd){errEl.textContent='Email et mot de passe requis.';errEl.style.display='block';return;}
+  if(pwd.length<6){errEl.textContent='Le mot de passe doit faire au moins 6 caractères.';errEl.style.display='block';return;}
+  btn.textContent='Création...';btn.disabled=true;
+  firebase.auth().createUserWithEmailAndPassword(email,pwd)
+    .then(()=>{errEl.style.display='none';btn.textContent='Créer le compte';btn.disabled=false;})
+    .catch(e=>{
+      errEl.textContent='Erreur : '+e.message;
+      errEl.style.display='block';
+      btn.textContent='Créer le compte';btn.disabled=false;
+    });
+}
+
+function doLogout(){
+  _fbListenerActive = false;
+  _fbInited = false;
+  if(fbRef){try{fbRef.off();}catch(e){}}
+  fbRef = null;
+  db = null;
+  issues = [];
+  try{localStorage.removeItem(KEY);}catch(e){}
+  firebase.auth().signOut();
+}
+// ============================
+
+let _fbInited = false;
+function initFirebase(){
+  if(_fbInited) return;
+  _fbInited = true;
+  try {
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+    // Écouter l'état de connexion
+    firebase.auth().onAuthStateChanged(user => {
+      if(user){
+        // Connecté — charger les données de cet utilisateur
+        db = firebase.database();
+        fbRef = db.ref('users/'+user.uid+'/issues');
+        startFirebaseSync();
+        // Si on est sur l'écran login/register, aller sur liste
+        const cur=document.querySelector('.screen.active');
+        if(cur&&(cur.id==='screen-login'||cur.id==='screen-register')){
+          goTo('liste');
+        }
+      } else {
+        // Non connecté -> écran de connexion
+        fbRef=null;
+        showLogin();
+      }
+    });
+  } catch(e) {
+    console.log('Firebase non disponible, mode local:', e);
+  }
+}
+
+let _fbListenerActive = false;
+function startFirebaseSync(){
+  if(_fbListenerActive) return;
+  _fbListenerActive = true;
+  try {
+    let fbInitialized = false;
+    fbRef.on('value', snap => {
+      const data = snap.val();
+      if(data && typeof data === 'object' && Object.keys(data).length > 0){
+        const loaded = Object.values(data).filter(Boolean);
+        loaded.sort((a,b)=>(a.id||0)-(b.id||0));
+        issues = loaded;
+        fixRhsFields();
+        try{localStorage.setItem(KEY,JSON.stringify(issues));}catch(e){}
+        renderList();
+        renderStats();
+        if(document.getElementById('screen-analyse').classList.contains('active')){
+          renderAnalyse();
+        }
+      } else if(!fbInitialized && issues.length > 0){
+        pushToFirebase();
+      }
+      fbInitialized = true;
+    });
+  } catch(e) {
+    _fbListenerActive = false;
+    console.log('Firebase sync error:', e);
+  }
+}
+function fixRhsFields(){
+  let changed=false;
+  issues.forEach(i=>{
+    if(i.statut!=='Résolu'&&(i.rhs===undefined||i.rhs==='loading')){
+      i.rhs=null;changed=true;
+    }
+  });
+  if(changed){try{localStorage.setItem(KEY,JSON.stringify(issues));}catch(e){}}
+}
+function load(){
+  try{const d=localStorage.getItem(KEY);if(d)issues=JSON.parse(d);}catch(e){issues=[];}
+  fixRhsFields();
+}
+function pushToFirebase(){
+  if(!fbRef||!issues.length)return;
+  const obj={};
+  issues.forEach(i=>{ if(i&&i.id) obj['issue_'+i.id]=i; });
+  fbRef.set(obj).catch(e=>console.log('Firebase sync error:',e));
+}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(issues));}catch(e){}
+  if(fbRef){
+    pushToFirebase();
+  }
+}
+function td(){return new Date().toISOString().split('T')[0]}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function getApiKey(){return localStorage.getItem('anthropic_api_key')||sessionStorage.getItem('anthropic_api_key')||'';}
+function saveApiKey(){
+  const k=document.getElementById('config-apikey').value.trim();
+  if(!k.startsWith('sk-')){alert('Clé invalide. Elle doit commencer par sk-');return;}
+  localStorage.setItem('anthropic_api_key',k);
+  sessionStorage.setItem('anthropic_api_key',k);
+  goTo('liste');
+}
+
+function goTo(screen){
+  if(screen==='nouveau'&&!getApiKey()){
+    goTo('config');
+    return;
+  }
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+screen).classList.add('active');
+  document.querySelectorAll('.tabbar-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll(`.tabbar-btn`).forEach(b=>{
+    if((screen==='liste'&&b.textContent.includes('Liste'))||
+       (screen==='nouveau'&&b.textContent.includes('Nouvelle'))||
+       (screen==='analyse'&&b.textContent.includes('Analyse')))
+      b.classList.add('active');
+  });
+  // Scroll en haut de la zone active
+  setTimeout(()=>{
+    const sa=document.querySelector('#screen-'+screen+' .scroll-area, #screen-'+screen+' .form-scroll');
+    if(sa) sa.scrollTop=0;
+  },30);
+  if(screen==='liste'){renderList();renderStats();}
+  if(screen==='nouveau'){
+    document.getElementById('step-saisie').style.display='block';
+    document.getElementById('step-fiche').style.display='none';
+    document.getElementById('analyse-loading').style.display='none';
+    document.getElementById('fiche-editee').style.display='block';
+    document.getElementById('f-saisie-libre').value='';
+    document.getElementById('f-titre').value='';
+    document.getElementById('f-desc').value='';
+    document.getElementById('f-note').value='';
+    document.getElementById('f-fin').value='';
+    document.getElementById('f-cat').value='Ressources Humaines';
+    document.getElementById('f-sect').value='Général';
+    onCatChange();
+    setTimeout(()=>document.getElementById('f-saisie-libre').focus(),100);
+  }
+  if(screen==='analyse'){switchAnalyseTab('global');}
+}
+
+function setFilter(el,type){
+  filters[type]=el.dataset.val;
+  document.querySelectorAll(`.filter-chip[data-filter="${type}"]`).forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  if(type==='statut'&&el.dataset.val===''){
+    filters.cat='';
+    document.querySelectorAll('.filter-chip[data-filter="cat"]').forEach(b=>b.classList.remove('active'));
+  }
+  if(type==='statut'&&el.dataset.val==='Résolu'&&masquerResolus){
+    masquerResolus=false;
+    const cb=document.getElementById('toggle-resolus-cb');
+    if(cb) cb.checked=false;
+  }
+  renderList();
+}
+
+function catBadge(c){
+  if(c==='Ressources Humaines')return'<span class="badge b-rh">RH</span>';
+  if(c==='Organisation / Process')return'<span class="badge b-orga">Orga.</span>';
+  if(c==='Planning')return'<span class="badge b-planning">Planning</span>';
+  return`<span class="badge b-orga">${esc(c)}</span>`;
+}
+function prioBadge(p){const m={Critique:'critique',Modéré:'modere',Mineur:'mineur'};return`<span class="badge b-${m[p]||'modere'}">${p}</span>`}
+function statBadge(s){const m={Ouvert:'ouvert','En cours':'encours',Résolu:'resolu'};return`<span class="badge b-${m[s]||'ouvert'}">${s}</span>`}
+
+function renderStats(){
+  const tot=issues.length;
+  const ouv=issues.filter(i=>i.statut==='Ouvert').length;
+  const enc=issues.filter(i=>i.statut==='En cours').length;
+  const rh=issues.filter(i=>i.categorie==='Ressources Humaines'&&i.statut!=='Résolu').length;
+  document.getElementById('stats-bar').innerHTML=`
+    <div class="stat"><div class="stat-label">Total</div><div class="stat-value" style="color:var(--indigo)">${tot}</div></div>
+    <div class="stat"><div class="stat-label">Ouverts</div><div class="stat-value" style="color:var(--amber)">${ouv}</div></div>
+    <div class="stat"><div class="stat-label">En cours</div><div class="stat-value" style="color:var(--indigo-light)">${enc}</div></div>
+    <div class="stat"><div class="stat-label">RH actifs</div><div class="stat-value" style="color:var(--coral)">${rh}</div></div>`;
+}
+
+function renderList(){
+  let list=issues.filter(i=>{
+    if(filters.statut&&i.statut!==filters.statut)return false;
+    if(filters.cat&&i.categorie!==filters.cat)return false;
+    if(masquerResolus&&i.statut==='Résolu')return false;
+    return true;
+  });
+  const so={Ouvert:0,'En cours':1,Résolu:2};
+  const po={Critique:0,Modéré:1,Mineur:2};
+  list.sort((a,b)=>(so[a.statut]||0)-(so[b.statut]||0)||(po[a.priorite]||1)-(po[b.priorite]||1));
+  const el=document.getElementById('issues-list');
+  if(!list.length){
+    el.innerHTML='<div class="empty"><div class="empty-icon">✅</div>Aucune problématique ici.</div>';
+    return;
+  }
+  el.innerHTML=list.map(i=>{
+    const open=exp[i.id];
+    const isResolving=resolving[i.id];
+    const notesHtml=(i.notes||[]).map(n=>`<div class="note"><span class="note-date">${n.date} — </span>${esc(n.texte)}</div>`).join('');
+
+    const resolutionBanner=i.resolution?`
+      <div class="resolution-banner">
+        <div class="resolution-banner-label">✓ Résolution</div>
+        <div class="resolution-banner-text">${esc(i.resolution.texte)}</div>
+        <div class="resolution-banner-date">Clôturé le ${i.resolution.date}</div>
+      </div>`:'';
+
+    const resolvePrompt=isResolving?`
+      <div class="resolve-prompt">
+        <p>Comment avez-vous résolu ce problème ?</p>
+        <textarea id="res-${i.id}" placeholder="Décrivez librement la solution mise en place..."></textarea>
+        <div class="resolve-prompt-actions">
+          <button class="btn-reformuler" id="btn-ref-${i.id}" onclick="reformulerResolution(${i.id})">✨ Reformuler</button>
+          <button class="btn-action" onclick="cancelRes(${i.id})">Annuler</button>
+        </div>
+        <div class="reformule-block" id="reformule-${i.id}">
+          <div class="reformule-label">Version reformulée — vérifiez avant de confirmer</div>
+          <div class="reformule-text" id="reformule-text-${i.id}"></div>
+          <div class="reformule-actions">
+            <button class="btn-action ok" onclick="confirmerAvecReformulation(${i.id})">✓ Confirmer cette version</button>
+            <button class="btn-action" onclick="confirmerTexteOriginal(${i.id})">Garder mon texte</button>
+          </div>
+        </div>
+      </div>`:'';
+
+    let rhBlock='';
+    if(open&&i.statut!=='Résolu'){
+      const catLabel=i.categorie==='Ressources Humaines'?'RH':i.categorie==='Organisation / Process'?'Organisation':'Planning';
+      if(i.rhs===null){
+        rhBlock=`<div class="rh-wrap"><div class="rh-head">Conseils — ${catLabel}</div><div class="rh-loading">Génération en cours...</div></div>`;
+      } else if(Array.isArray(i.rhs)&&i.rhs.length===2){
+        rhBlock=`<div class="rh-wrap">
+          <div class="rh-head">Conseils — ${catLabel}</div>
+          <div class="rh-card"><div class="rh-card-label">Piste 1 — ${esc(i.rhs[0].label)}</div><div class="rh-card-text">${esc(i.rhs[0].text)}</div></div>
+          <div class="rh-card"><div class="rh-card-label">Piste 2 — ${esc(i.rhs[1].label)}</div><div class="rh-card-text">${esc(i.rhs[1].text)}</div></div>
+        </div>`;
+      }
+    }
+
+    // Calcul souffrance : En cours depuis > 20j sans remarque récente
+    const SEUIL_SOUFFRANCE=20;
+    let isSouffrance=false;
+    if(i.statut==='En cours'&&i.debut){
+      const joursDepuis=Math.floor((new Date()-new Date(i.debut))/(86400000));
+      const derniereActivite=i.notes&&i.notes.length?new Date(i.notes[i.notes.length-1].date):new Date(i.debut);
+      const joursSansActivite=Math.floor((new Date()-derniereActivite)/(86400000));
+      if(joursDepuis>=SEUIL_SOUFFRANCE&&joursSansActivite>=SEUIL_SOUFFRANCE) isSouffrance=true;
+    }
+    const btnLabel=open?'▲ Masquer':`Remarques (${(i.notes||[]).length})${i.statut!=='Résolu'?' + conseils':''}`
+
+    return `<div class="icard${i.statut==='Résolu'?' resolved':''}${isSouffrance?' souffrance':''}" id="card-${i.id}">
+      <div class="ihead">
+        <div class="ititle">${esc(i.titre)}</div>
+        <div class="ibadges">${isSouffrance?'<span class="badge-souffrance">⚠ En attente</span>':''}${catBadge(i.categorie)}${prioBadge(i.priorite)}</div>
+      </div>
+      <div class="imeta">
+        <span class="imeta-chip">📍 ${esc(i.secteur||'Général')}</span>
+        ${statBadge(i.statut)}
+        <span class="imeta-chip">📅 ${i.debut||'—'}</span>
+      </div>
+      ${i.desc?`<div class="idesc">${esc(i.desc)}</div>`:''}
+      ${resolutionBanner}
+      ${resolvePrompt}
+      <div class="iactions">
+        ${i.statut==='Ouvert'?`<button class="btn-action" onclick="setStatut(${i.id},'En cours')">→ En cours</button>`:''}
+        ${i.statut!=='Résolu'&&!isResolving?`<button class="btn-action ok" onclick="askRes(${i.id})">✓ Résolu</button>`:''}
+        <button class="btn-action" onclick="toggleExp(${i.id})">${btnLabel}</button>
+        <button class="btn-action" onclick="ouvrirModif(${i.id})">Modifier</button>
+        <button class="btn-action danger" onclick="del(${i.id})">Supprimer</button>
+      </div>
+      ${open?`<div class="exp-block">
+        ${notesHtml||'<div style="font-size:12px;color:var(--text2);margin-bottom:6px">Aucune remarque pour l\'instant.</div>'}
+        <div class="add-note">
+          <input type="text" id="ni-${i.id}" placeholder="Ajouter une remarque...">
+          <button class="btn-action" onclick="addNote(${i.id})">Ajouter</button>
+        </div>
+        ${rhBlock}
+        <button class="btn-hide-bottom" onclick="toggleExp(${i.id})">▲ Masquer</button>
+      </div>`:''}
+    </div>`;
+  }).join('');
+  list.forEach(i=>{
+    if(exp[i.id]&&i.rhs===null&&i.statut!=='Résolu')fetchRH(i.id);
+  });
+}
+
+function toggleExp(id){exp[id]=!exp[id];renderList();}
+function askRes(id){resolving[id]=true;renderList();setTimeout(()=>{const e=document.getElementById('res-'+id);if(e)e.focus();},50);}
+function cancelRes(id){delete resolving[id];renderList();}
+// Stockage temporaire des reformulations
+const reformulations={};
+
+async function reformulerResolution(id){
+  const inp=document.getElementById('res-'+id);
+  const btn=document.getElementById('btn-ref-'+id);
+  const bloc=document.getElementById('reformule-'+id);
+  const txt=document.getElementById('reformule-text-'+id);
+  if(!inp||!inp.value.trim()){inp.focus();inp.style.border='0.5px solid #A32D2D';setTimeout(()=>inp.style.border='0.5px solid #C0DD97',1500);return;}
+  if(!getApiKey()){
+    txt.textContent='Clé API non configurée. Allez dans ⚙️ Configuration pour l\'ajouter.';
+    bloc.style.display='block';
+    return;
+  }
+  inp.style.border='0.5px solid #C0DD97';
+  // Anti-double clic
+  btn.disabled=true;btn.textContent='⏳ Reformulation...';
+  const prompt=`Tu es l'assistant d'un responsable de centre de dialyse. Il vient de résoudre une problématique et décrit ce qui a été fait.
+Reformule son texte de façon professionnelle, neutre et concise. Tu ne dois RIEN inventer, RIEN ajouter, AUCUNE recommandation. Reprends uniquement les faits décrits, reformulés sobrement. Style compte-rendu factuel, phrases courtes. Si le texte est court, la reformulation reste courte.
+Texte brut : "${inp.value.trim()}"
+Réponds UNIQUEMENT avec le texte reformulé, sans introduction, sans guillemets, sans markdown.`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:prompt}]})});
+    const data=await r.json();
+    const reformule=data.content.map(c=>c.text||'').join('').trim();
+    if(!reformule)throw new Error('Réponse vide');
+    reformulations[id]=reformule;
+    txt.textContent=reformule;
+    bloc.style.display='block';
+    bloc.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }catch(e){
+    // En cas d'erreur API, proposer de confirmer avec le texte original
+    reformulations[id]=inp.value.trim();
+    txt.textContent='(Reformulation indisponible) '+inp.value.trim();
+    bloc.style.display='block';
+  }finally{
+    btn.disabled=false;btn.textContent='✨ Reformuler';
+  }
+}
+
+function confirmerAvecReformulation(id){
+  const i=issues.find(x=>x.id===id);if(!i)return;
+  const texte=reformulations[id]||document.getElementById('res-'+id)?.value.trim()||'Résolution non précisée.';
+  i.statut='Résolu';i.fin=td();
+  i.resolution={texte,date:td()};
+  delete resolving[id];delete reformulations[id];
+  save();renderList();renderStats();
+}
+
+function confirmerTexteOriginal(id){
+  const inp=document.getElementById('res-'+id);
+  const i=issues.find(x=>x.id===id);if(!i)return;
+  i.statut='Résolu';i.fin=td();
+  i.resolution={texte:(inp?inp.value.trim():'')||'Résolution non précisée.',date:td()};
+  delete resolving[id];delete reformulations[id];
+  save();renderList();renderStats();
+}
+
+function confirmRes(id){
+  confirmerTexteOriginal(id);
+}
+function setStatut(id,s){
+  const i=issues.find(x=>x.id===id);if(!i)return;
+  i.statut=s;save();renderList();renderStats();
+}
+function addNote(id){
+  const inp=document.getElementById('ni-'+id);
+  if(!inp||!inp.value.trim())return;
+  const i=issues.find(x=>x.id===id);if(!i)return;
+  if(!i.notes)i.notes=[];
+  i.notes.push({date:td(),texte:inp.value.trim()});
+  inp.value='';save();renderList();
+}
+function del(id){
+  const i=issues.find(x=>x.id===id);
+  pendingDelId=id;
+  document.getElementById('modal-suppr-msg').textContent=i?'« '+i.titre.substring(0,50)+(i.titre.length>50?'…':'')+'» sera définitivement supprimée.':'Cette action est irréversible.';
+  document.getElementById('modal-suppr').classList.remove('hidden');
+}
+function confirmerSuppr(){
+  if(pendingDelId===null)return;
+  const id=pendingDelId;
+  pendingDelId=null;
+  document.getElementById('modal-suppr').classList.add('hidden');
+  issues=issues.filter(x=>x.id!==id);
+  delete exp[id];delete resolving[id];
+  save();renderList();renderStats();
+}
+function annulerSuppr(){
+  pendingDelId=null;
+  document.getElementById('modal-suppr').classList.add('hidden');
+}
+
+async function fetchRH(id){
+  const i=issues.find(x=>x.id===id);
+  if(!i||i.rhs!==null)return;
+  i.rhs='loading';
+  const catContext = i.categorie==='Ressources Humaines'
+    ? 'Génère 2 pistes de gestion : une managériale (posture, entretien, médiation) et une formelle (procédure, écrit). 3 phrases max par piste.'
+    : i.categorie==='Organisation / Process'
+    ? 'Génère 2 conseils pratiques pour améliorer ce process : un conseil opérationnel immédiat et un conseil structurel à moyen terme. 3 phrases max par piste.'
+    : 'Génère 2 pistes pour résoudre ce problème de planning : une solution à court terme et une solution organisationnelle durable. 3 phrases max par piste.';
+
+  const prompt=`Tu es un responsable expert d'un centre de dialyse (100 agents). Voici une problématique terrain :
+Titre : ${i.titre}
+Catégorie : ${i.categorie}
+Description : ${i.desc||'Non précisée'}
+Priorité : ${i.priorite}
+${catContext}
+Reste factuel et concret. Ne dépasse pas 3 phrases par piste.
+Réponds UNIQUEMENT en JSON valide sans markdown :
+[{"label":"titre court","text":"description"},{"label":"titre court","text":"description"}]`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:prompt}]})});
+    const data=await r.json();
+    i.rhs=JSON.parse(data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim());
+  }catch(e){
+    i.rhs=[
+      {label:'Entretien individuel',text:'Recevoir chaque personne séparément, dans un cadre neutre. Écouter les faits sans jugement, reformuler les attentes. Fixer des engagements et une date de point.'},
+      {label:'Procédure formelle RH',text:'Consigner les faits par écrit avec dates et témoins. Informer le service RH et engager la procédure du règlement intérieur si les faits sont avérés.'}
+    ];
+  }
+  save();renderList();
+}
+
+function retourSaisie(){
+  document.getElementById('step-fiche').style.display='none';
+  document.getElementById('step-saisie').style.display='block';
+}
+
+let microActif=false;
+let recognition=null;
+
+function toggleMicro(){
+  const btn=document.getElementById('btn-micro');
+  const ta=document.getElementById('f-saisie-libre');
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
+    alert("La dictée vocale n est pas disponible. Utilisez Safari sur iPhone.");
+    return;
+  }
+  if(microActif){
+    if(recognition)recognition.stop();
+    microActif=false;
+    btn.innerHTML='<span style="font-size:14px">🎤</span> Dicter';
+    btn.style.background='var(--surface2)';
+    return;
+  }
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR();
+  recognition.lang='fr-FR';
+  recognition.continuous=true;
+  recognition.interimResults=true;
+  recognition.onresult=e=>{
+    let final='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)final+=e.results[i][0].transcript+' ';
+    }
+    if(final)ta.value+=final;
+  };
+  recognition.onend=()=>{
+    microActif=false;
+    btn.innerHTML='<span style="font-size:14px">🎤</span> Dicter';
+    btn.style.background='var(--surface2)';
+  };
+  recognition.start();
+  microActif=true;
+  btn.innerHTML='<span style="font-size:14px">⏹</span> Arrêter';
+  btn.style.background='#FCEBEB';
+}
+
+async function analyserSaisie(){
+  const texte=document.getElementById('f-saisie-libre').value.trim();
+  if(!texte){document.getElementById('f-saisie-libre').focus();return;}
+  const btn=document.getElementById('btn-analyser');
+  btn.textContent='Pulse analyse...';
+  btn.disabled=true;
+  const today=td();
+  const prompt=`Tu es un assistant d'un responsable de centre de dialyse. Il te décrit une situation terrain. Tu dois uniquement reformuler ce qu'il dit de façon claire et neutre, sans interpréter, sans ajouter de conclusions, sans recommandations.
+
+Texte brut : "${texte}"
+
+Réponds UNIQUEMENT en JSON valide sans markdown :
+{
+  "titre": "titre factuel court (max 8 mots, reprend les faits bruts)",
+  "description": "reformulation neutre et factuelle uniquement de ce qui a été dit, sans ajout d'interprétation ni de recommandation (2-3 phrases max)",
+  "categorie": "Ressources Humaines" ou "Organisation / Process" ou "Planning",
+  "priorite": "Mineur" ou "Modéré" ou "Critique"
+}
+
+Règles :
+- La description doit reprendre uniquement les faits décrits, reformulés sobrement
+- Ne jamais ajouter de contexte, de risques supposés ou de recommandations
+- Priorité Critique : impact direct patients ou blocage service / Modéré : problème d'équipe ou récurrent / Mineur : ponctuel ou mineur`;
+
+  let titre='',description=texte,categorie='Organisation / Process',priorite='Modéré';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:prompt}]})});
+    const data=await r.json();
+    const txt=data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(txt);
+    titre=parsed.titre||'';
+    description=parsed.description||texte;
+    categorie=parsed.categorie||'Organisation / Process';
+    priorite=parsed.priorite||'Modéré';
+  }catch(e){
+    console.log('Analyse error:',e);
+    // En cas d'erreur, utiliser le texte brut comme titre
+    titre=texte.substring(0,60);
+    description=texte;
+  } finally {
+    // Toujours réinitialiser le bouton
+    btn.textContent='Analyser avec Claude';
+    btn.disabled=false;
+  }
+  const newId=issues.length?Math.max(...issues.map(i=>i.id))+1:1;
+  issues.push({
+    id:newId,
+    titre,
+    desc:description,
+    categorie,
+    secteur:'Général',
+    priorite,
+    statut:'Ouvert',
+    debut:today,
+    fin:'',
+    notes:[],
+    cree:today,
+    rhs:null,
+    resolution:null
+  });
+  save();
+  goTo('liste');
+}
+
+let editId=null;
+
+function ouvrirModif(id){
+  const i=issues.find(x=>x.id===id);if(!i)return;
+  editId=id;
+  // Mémoriser position scroll de la liste
+  const sa=document.querySelector('#screen-liste .scroll-area');
+  if(sa) scrollPositions['liste']=sa.scrollTop;
+  document.getElementById('m-titre').value=i.titre||'';
+  document.getElementById('m-desc').value=i.desc||'';
+  document.getElementById('m-cat').value=i.categorie||'Organisation / Process';
+  document.getElementById('m-prio').value=i.priorite||'Modéré';
+  const _sv=i.secteur||'Général';
+  const _ms=document.getElementById('m-sect');
+  if(_ms) _ms.value=['Général','Coco','Ananas','Letchis','Voyageur','Extension'].includes(_sv)?_sv:'Général';
+  document.getElementById('m-debut').value=i.debut||'';
+  document.getElementById('m-fin').value=i.fin||'';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-modifier').classList.add('active');
+  setTimeout(()=>{
+    const sa=document.querySelector('#screen-modifier .form-scroll');
+    if(sa) sa.scrollTop=0;
+  },30);
+}
+
+function saveModif(){
+  const i=issues.find(x=>x.id===editId);if(!i)return;
+  i.titre=document.getElementById('m-titre').value.trim()||i.titre;
+  i.desc=document.getElementById('m-desc').value.trim();
+  i.categorie=document.getElementById('m-cat').value;
+  i.priorite=document.getElementById('m-prio').value;
+  i.secteur=document.getElementById('m-sect').value||i.secteur||'Général';
+  i.debut=document.getElementById('m-debut').value;
+  i.fin=document.getElementById('m-fin').value;
+  if(i.categorie==='Ressources Humaines'&&i.rhs===undefined)i.rhs=null;
+  const savedId=editId;
+  save();
+  goTo('liste');
+  // Restaurer la position de scroll puis scroller sur la fiche modifiée
+  setTimeout(()=>{
+    const sa=document.querySelector('#screen-liste .scroll-area');
+    if(sa){
+      if(scrollPositions['liste']!==undefined) sa.scrollTop=scrollPositions['liste'];
+      const card=document.getElementById('card-'+savedId);
+      if(card){
+        card.style.transition='box-shadow .3s';
+        card.style.boxShadow='0 0 0 2px var(--indigo)';
+        setTimeout(()=>{card.style.boxShadow='';card.style.transition='';},1400);
+        card.scrollIntoView({behavior:'smooth',block:'nearest'});
+      }
+    }
+  },150);
+}
+
+function onCatChange(){
+  const v=document.getElementById('f-cat').value;
+  document.getElementById('rh-hint').style.display=v==='Ressources Humaines'?'block':'none';
+}
+
+function saveIssue(){
+  const titre=document.getElementById('f-titre').value.trim();
+  if(!titre){document.getElementById('f-titre').focus();return;}
+  const cat=document.getElementById('f-cat').value;
+  const note=document.getElementById('f-note').value.trim();
+  const newId=issues.length?Math.max(...issues.map(i=>i.id))+1:1;
+  issues.push({
+    id:newId,titre,
+    desc:document.getElementById('f-desc').value.trim(),
+    categorie:cat,
+    secteur:(document.getElementById('f-sect')?document.getElementById('f-sect').value:null)||'Général',
+    priorite:document.getElementById('f-prio').value,
+    statut:'Ouvert',
+    debut:document.getElementById('f-debut').value||td(),
+    fin:document.getElementById('f-fin').value,
+    notes:note?[{date:td(),texte:note}]:[],
+    cree:td(),
+    rhs:null,
+    resolution:null
+  });
+  save();goTo('liste');
+}
+
+function renderAnalyse(){
+  const el=document.getElementById('analyse-content');
+  if(!issues.length && typeof fbRef !== 'undefined' && fbRef){
+    el.innerHTML='<div class="empty-analyse">Chargement des données...</div>';
+    setTimeout(renderAnalyse, 600);
+    return;
+  }
+  if(!issues.length){
+    el.innerHTML='<div class="empty-analyse">Aucune donnée.<br>Enregistrez des problématiques pour voir l\'analyse.</div>';
+    return;
+  }
+  if(window._chartCat){try{window._chartCat.destroy();}catch(e){}}
+  const total=issues.length;
+  const resolus=issues.filter(i=>i.statut==='Résolu');
+  const ouverts=issues.filter(i=>i.statut==='Ouvert');
+  const encours=issues.filter(i=>i.statut==='En cours');
+  const txRes=total?Math.round(resolus.length/total*100):0;
+  function daysBetween(d1,d2){return Math.max(0,Math.round((new Date(d2)-new Date(d1))/(86400000)));}
+  const delais=resolus.filter(i=>i.debut&&i.fin).map(i=>daysBetween(i.debut,i.fin));
+  const delaiMoyen=delais.length?Math.round(delais.reduce((a,b)=>a+b,0)/delais.length):null;
+  const critiques=issues.filter(i=>i.priorite==='Critique'&&i.statut!=='Résolu').length;
+  const cats=['Ressources Humaines','Organisation / Process','Planning'];
+  const catColors=['#D4537E','#BA7517','#1D9E75'];
+  const catLabels=['RH','Organisation','Planning'];
+  const catCounts=cats.map(c=>issues.filter(i=>i.categorie===c).length);
+  const statCounts=[ouverts.length,encours.length,resolus.length];
+  const statLabels=['Ouvert','En cours','Résolu'];
+  const statBg=['#F1EFE8','#EEEDFE','#EAF3DE'];
+  const statFg=['#5F5E5A','#534AB7','#3B6D11'];
+  const maxStat=Math.max(...statCounts,1);
+  const delaiParCat=cats.map(c=>{
+    const r=resolus.filter(i=>i.categorie===c&&i.debut&&i.fin);
+    if(!r.length)return null;
+    return Math.round(r.map(i=>daysBetween(i.debut,i.fin)).reduce((a,b)=>a+b,0)/r.length);
+  });
+  el.innerHTML=`
+    <div class="kpis-grid">
+      <div class="kpi-card"><div class="kpi-label">Total</div><div class="kpi-value">${total}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Taux résolution</div><div class="kpi-value">${txRes}%</div><div class="kpi-sub">${resolus.length} résolu(s)</div></div>
+      <div class="kpi-card"><div class="kpi-label">Délai moyen</div><div class="kpi-value">${delaiMoyen!==null?delaiMoyen+'j':'—'}</div><div class="kpi-sub">de résolution</div></div>
+      <div class="kpi-card"><div class="kpi-label">Critiques actifs</div><div class="kpi-value" style="color:#A32D2D">${critiques}</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Répartition par catégorie</div>
+      <div class="legend-row">${cats.map((c,i)=>catCounts[i]?`<span><span class="ldot" style="background:${catColors[i]}"></span>${catLabels[i]} ${Math.round(catCounts[i]/total*100)}%</span>`:'').join('')}</div>
+      <div style="position:relative;height:200px"><canvas id="chart-cat"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Répartition par statut</div>
+      ${statLabels.map((l,i)=>`
+        <div class="bar-row">
+          <div class="bar-label">${l}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(statCounts[i]/maxStat*100)}%;background:${statBg[i]};color:${statFg[i]}">${statCounts[i]}</div></div>
+          <div class="bar-pct">${Math.round(statCounts[i]/total*100)}%</div>
+        </div>`).join('')}
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Délai moyen de résolution</div>
+      <table class="delai-table">
+        <thead><tr><th>Catégorie</th><th>Résolus</th><th>Délai moy.</th><th>Appréciation</th></tr></thead>
+        <tbody>${cats.map((c,i)=>{
+          const nb=resolus.filter(x=>x.categorie===c).length;
+          const d=delaiParCat[i];
+          const tend=d===null?'—':d<=3?'<span style="color:#3B6D11">Rapide</span>':d<=7?'<span style="color:#854F0B">Moyen</span>':'<span style="color:#A32D2D">Long</span>';
+          return`<tr><td>${catLabels[i]}</td><td>${nb}</td><td>${d!==null?d+'j':'—'}</td><td>${tend}</td></tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+  if(typeof Chart!=='undefined'){
+    window._chartCat = new Chart(document.getElementById('chart-cat'),{
+      type:'doughnut',
+      data:{labels:catLabels,datasets:[{data:catCounts,backgroundColor:catColors,borderWidth:2,borderColor:'#ffffff'}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.parsed+' problématique(s)'}}}}
+    });
+  }
+}
+
+function renderAnalyseSecteur(){
+  const el=document.getElementById('analyse-secteur-content');
+  if(!issues.length){
+    el.innerHTML='<div class="empty-analyse">Aucune donnée disponible.</div>';
+    return;
+  }
+  // Récupérer tous les secteurs uniques
+  const secteurs=[...new Set(issues.map(i=>i.secteur||'Général'))].sort();
+  const total=issues.length;
+  function daysBetween(d1,d2){return Math.max(0,Math.round((new Date(d2)-new Date(d1))/(86400000)));}
+
+  const rows=secteurs.map(s=>{
+    const sec=issues.filter(i=>(i.secteur||'Général')===s);
+    const res=sec.filter(i=>i.statut==='Résolu');
+    const actifs=sec.filter(i=>i.statut!=='Résolu');
+    const critiques=sec.filter(i=>i.priorite==='Critique'&&i.statut!=='Résolu').length;
+    const delais=res.filter(i=>i.debut&&i.fin).map(i=>daysBetween(i.debut,i.fin));
+    const delaiMoy=delais.length?Math.round(delais.reduce((a,b)=>a+b,0)/delais.length):null;
+    const txRes=sec.length?Math.round(res.length/sec.length*100):0;
+    const pct=Math.round(sec.length/total*100);
+    return{s,total:sec.length,actifs:actifs.length,res:res.length,critiques,delaiMoy,txRes,pct};
+  }).sort((a,b)=>b.total-a.total);
+
+  const maxTot=Math.max(...rows.map(r=>r.total),1);
+
+  el.innerHTML=`
+    <div class="chart-card">
+      <div class="chart-title">Fiches par secteur</div>
+      ${rows.map(r=>`
+        <div class="bar-row" style="margin-bottom:10px">
+          <div class="bar-label" style="width:80px;font-size:11px">${esc(r.s)}</div>
+          <div style="flex:1">
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${Math.round(r.total/maxTot*100)}%;background:#E3EFFE;color:#185FA5">${r.total}</div>
+            </div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">${r.actifs} actif(s) · ${r.critiques} critique(s)</div>
+          </div>
+          <div class="bar-pct">${r.pct}%</div>
+        </div>`).join('')}
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Détail par secteur</div>
+      <table class="secteur-table">
+        <thead><tr><th>Secteur</th><th>Total</th><th>Actifs</th><th>Critiques</th><th>Taux rés.</th><th>Délai moy.</th></tr></thead>
+        <tbody>${rows.map(r=>`
+          <tr>
+            <td style="font-weight:500">${esc(r.s)}</td>
+            <td>${r.total}</td>
+            <td>${r.actifs}</td>
+            <td style="color:${r.critiques>0?'#A32D2D':'var(--text2)'};font-weight:${r.critiques>0?'600':'400'}">${r.critiques}</td>
+            <td>${r.txRes}%</td>
+            <td>${r.delaiMoy!==null?r.delaiMoy+'j':'—'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function switchAnalyseTab(tab){
+  ['global','secteur','bilan'].forEach(t=>{
+    const tabEl=document.getElementById('analyse-tab-'+t);
+    const btnEl=document.getElementById('atab-'+t);
+    if(tabEl) tabEl.style.display=t===tab?'block':'none';
+    if(btnEl){
+      btnEl.style.color=t===tab?'var(--indigo)':'var(--text3)';
+      btnEl.style.fontWeight='700';
+      btnEl.style.borderBottom=t===tab?'2px solid var(--indigo)':'2px solid transparent';
+    }
+  });
+  if(tab==='global') renderAnalyse();
+  if(tab==='secteur') renderAnalyseSecteur();
+  if(tab==='bilan'){
+    // Pré-remplir dates avec mois courant
+    const now=new Date();
+    const firstDay=new Date(now.getFullYear(),now.getMonth(),1).toISOString().split('T')[0];
+    const today=td();
+    const du=document.getElementById('bilan-du');
+    const au=document.getElementById('bilan-au');
+    if(du&&!du.value) du.value=firstDay;
+    if(au&&!au.value) au.value=today;
+  }
+}
+
+function genererBilan(){
+  const duVal=document.getElementById('bilan-du').value;
+  const auVal=document.getElementById('bilan-au').value;
+  const errEl=document.getElementById('bilan-error');
+  const btn=document.getElementById('btn-gen-bilan');
+  const resultEl=document.getElementById('bilan-result');
+
+  // Validation
+  errEl.style.display='none';
+  if(!duVal||!auVal){errEl.textContent='Veuillez renseigner les deux dates.';errEl.style.display='block';return;}
+  if(duVal>auVal){errEl.textContent='La date de début doit être antérieure ou égale à la date de fin.';errEl.style.display='block';return;}
+
+  // Anti-double clic
+  btn.disabled=true;
+  btn.textContent='Génération...';
+
+  try{
+    const du=new Date(duVal);
+    const au=new Date(auVal);
+    au.setHours(23,59,59,999);
+
+    function inPeriod(dateStr){
+      if(!dateStr)return false;
+      const d=new Date(dateStr);
+      return d>=du && d<=au;
+    }
+    function daysBetween(d1,d2){return Math.max(0,Math.round((new Date(d2)-new Date(d1))/(86400000)));}
+
+    // Problèmes ouverts PENDANT la période (debut dans la période)
+    const ouverts=issues.filter(i=>inPeriod(i.debut||i.cree));
+    // Problèmes résolus PENDANT la période (fin dans la période)
+    const resolus=issues.filter(i=>i.statut==='Résolu'&&inPeriod(i.fin));
+    // Problèmes actifs à la fin de la période
+    const actifs=issues.filter(i=>i.statut!=='Résolu'&&(inPeriod(i.debut||i.cree)||(i.debut&&new Date(i.debut)<=au)));
+    const critiques=actifs.filter(i=>i.priorite==='Critique');
+    const delais=resolus.filter(i=>i.debut&&i.fin).map(i=>daysBetween(i.debut,i.fin));
+    const delaiMoyen=delais.length?Math.round(delais.reduce((a,b)=>a+b,0)/delais.length):null;
+
+    const cats=['Ressources Humaines','Organisation / Process','Planning'];
+    const catLabels=['RH','Organisation','Planning'];
+    const catColors=['#D4537E','#BA7517','#1D9E75'];
+    const ouvParCat=cats.map(c=>ouverts.filter(i=>i.categorie===c).length);
+    const resParCat=cats.map(c=>resolus.filter(i=>i.categorie===c).length);
+
+    const secteurs=[...new Set(issues.map(i=>i.secteur||'Général'))].sort();
+    const secData=secteurs.map(s=>({
+      s,
+      ouverts:ouverts.filter(i=>(i.secteur||'Général')===s).length,
+      resolus:resolus.filter(i=>(i.secteur||'Général')===s).length
+    })).filter(r=>r.ouverts>0||r.resolus>0).sort((a,b)=>(b.ouverts+b.resolus)-(a.ouverts+a.resolus));
+
+    // Formatage date lisible
+    const fmtDate=d=>new Date(d+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+    const periode=`Du ${fmtDate(duVal)} au ${fmtDate(auVal)}`;
+
+    // Mettre à jour l'en-tête PDF
+    document.getElementById('pdf-periode').textContent=periode;
+    document.getElementById('pdf-date-gen').textContent='Généré le '+new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+
+    const bilanEl=document.getElementById('bilan-content');
+    bilanEl.innerHTML=`
+      <div style="font-size:13px;color:var(--text2);margin-bottom:12px;font-style:italic">${periode}</div>
+      <div class="kpis-grid" style="grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="kpi-card"><div class="kpi-label">Ouverts</div><div class="kpi-value">${ouverts.length}</div><div class="kpi-sub">sur la période</div></div>
+        <div class="kpi-card"><div class="kpi-label">Résolus</div><div class="kpi-value" style="color:#3B6D11">${resolus.length}</div><div class="kpi-sub">sur la période</div></div>
+        <div class="kpi-card"><div class="kpi-label">Délai moyen</div><div class="kpi-value">${delaiMoyen!==null?delaiMoyen+'j':'—'}</div><div class="kpi-sub">résolution</div></div>
+      </div>
+      ${critiques.length?`<div style="background:#FCEBEB;border:0.5px solid #F7C1C1;border-radius:var(--radius);padding:12px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:600;color:#A32D2D;margin-bottom:6px">⚠ ${critiques.length} problème(s) critique(s) actif(s)</div>
+        ${critiques.map(i=>`<div style="font-size:12px;color:#7B1D1D;margin-bottom:3px">• ${esc(i.titre)} <span style="color:#999;font-size:11px">(${i.secteur||'Général'})</span></div>`).join('')}
+      </div>`:''}
+      <div class="chart-card">
+        <div class="chart-title">Répartition par catégorie</div>
+        <table class="delai-table">
+          <thead><tr><th>Catégorie</th><th>Ouverts</th><th>Résolus</th><th>Solde</th></tr></thead>
+          <tbody>${cats.map((c,i)=>ouvParCat[i]+resParCat[i]>0?`
+            <tr>
+              <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${catColors[i]};margin-right:5px"></span>${catLabels[i]}</td>
+              <td>${ouvParCat[i]}</td>
+              <td style="color:#3B6D11">${resParCat[i]}</td>
+              <td style="font-weight:600;color:${ouvParCat[i]-resParCat[i]>0?'#A32D2D':ouvParCat[i]-resParCat[i]<0?'#3B6D11':'var(--text2)'}">${ouvParCat[i]-resParCat[i]>0?'+':''}${ouvParCat[i]-resParCat[i]}</td>
+            </tr>`:'').join('')}
+          </tbody>
+        </table>
+      </div>
+      ${secData.length?`<div class="chart-card">
+        <div class="chart-title">Répartition par secteur</div>
+        <table class="secteur-table">
+          <thead><tr><th>Secteur</th><th>Ouverts</th><th>Résolus</th></tr></thead>
+          <tbody>${secData.map(r=>`<tr><td style="font-weight:500">${esc(r.s)}</td><td>${r.ouverts}</td><td style="color:#3B6D11">${r.resolus}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>`:''}
+      ${resolus.length?`<div class="chart-card">
+        <div class="chart-title">Problèmes résolus sur la période</div>
+        ${resolus.map(i=>`
+          <div style="padding:8px 0;border-bottom:0.5px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+              <span style="font-size:13px;font-weight:500;color:var(--text)">${esc(i.titre)}</span>
+              ${catBadge(i.categorie)}
+            </div>
+            <div style="font-size:11px;color:var(--text3)">Clôturé le ${i.fin} · ${i.secteur||'Général'}${i.debut&&i.fin?' · '+daysBetween(i.debut,i.fin)+'j':''}</div>
+            ${i.resolution?`<div style="font-size:12px;color:#3B6D11;margin-top:3px">✓ ${esc(i.resolution.texte)}</div>`:''}
+          </div>`).join('')}
+      </div>`:''}
+      ${actifs.length?`<div class="chart-card">
+        <div class="chart-title">Problèmes encore actifs</div>
+        ${actifs.map(i=>`
+          <div style="padding:8px 0;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--text)">${esc(i.titre)}</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px">${i.secteur||'Général'} · ${i.statut}</div>
+            </div>
+            ${prioBadge(i.priorite)}
+          </div>`).join('')}
+      </div>`:''}`;
+
+    resultEl.style.display='block';
+    // Scroll vers le résultat
+    setTimeout(()=>resultEl.scrollIntoView({behavior:'smooth',block:'start'}),100);
+  }catch(e){
+    errEl.textContent='Une erreur est survenue. Veuillez réessayer.';
+    errEl.style.display='block';
+  }finally{
+    btn.disabled=false;
+    btn.textContent='Générer le bilan';
+  }
+}
+
+function exporterPDF(){
+  // Rendre visible l'en-tête PDF
+  const header=document.querySelector('.pdf-header');
+  if(header) header.style.display='block';
+  // Masquer le bouton export pendant l'impression
+  setTimeout(()=>{
+    window.print();
+    // Après impression, remettre l'en-tête masqué
+    setTimeout(()=>{if(header)header.style.display='none';},500);
+  },150);
+}
+
+// Service Worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+load();
+setTimeout(initFirebase, 200);
+// La gestion d'accès est gérée par Firebase Auth
+</script>
+
+<!-- MODALE SUPPRESSION -->
+<div class="modal-overlay hidden" id="modal-suppr">
+  <div class="modal-box">
+    <div class="modal-title">Supprimer cette problématique ?</div>
+    <div class="modal-msg" id="modal-suppr-msg">Cette action est irréversible.</div>
+    <div class="modal-actions">
+      <button class="btn-action danger" style="width:100%;padding:12px;font-size:15px;font-weight:600;border-radius:var(--radius)" onclick="confirmerSuppr()">Supprimer</button>
+      <button class="btn-action" style="width:100%;padding:12px;font-size:15px;border-radius:var(--radius)" onclick="annulerSuppr()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

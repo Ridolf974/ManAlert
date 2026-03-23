@@ -1,0 +1,22 @@
+{
+  "name": "Pulse",
+  "short_name": "Pulse",
+  "description": "Suivi des problématiques terrain — Centre de dialyse",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F4F5FF",
+  "theme_color": "#5B4FE9",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
