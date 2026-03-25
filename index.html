@@ -5,15 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Pulse">
-<meta name="theme-color" content="#1a1a1a">
+<meta name="apple-mobile-web-app-title" content="ManAlert">
+<meta name="theme-color" content="#085041">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<title>Pulse</title>
+<title>ManAlert</title>
 <style>
 /* ============================================================
    DESIGN SYSTEM — Moderne & Coloré
@@ -26,9 +26,9 @@
 
 :root{
   /* Couleurs principales */
-  --indigo:#5B4FE9;
-  --indigo-light:#7B72F0;
-  --indigo-dim:#EEF0FF;
+  --indigo:#1D9E75;
+  --indigo-light:#0F6E56;
+  --indigo-dim:#E1F5EE;
   --coral:#FF5F5F;
   --coral-dim:#FFF0F0;
   --mint:#1DB88A;
@@ -47,11 +47,11 @@
   --text3:#9896B0;
 
   /* Bordures */
-  --border:rgba(91,79,233,0.12);
-  --border2:rgba(91,79,233,0.25);
+  --border:rgba(29,158,117,0.12);
+  --border2:rgba(29,158,117,0.25);
 
   /* Ombres */
-  --shadow-sm:0 1px 4px rgba(91,79,233,0.08);
+  --shadow-sm:0 1px 4px rgba(29,158,117,0.08);
 
   --radius:12px;
   --radius-lg:18px;
@@ -66,10 +66,10 @@
     --text:#F0EFFF;
     --text2:#9896B0;
     --text3:#5A5878;
-    --border:rgba(91,79,233,0.2);
-    --border2:rgba(91,79,233,0.35);
+    --border:rgba(29,158,117,0.2);
+    --border2:rgba(29,158,117,0.35);
     --shadow-sm:0 1px 4px rgba(0,0,0,0.3);
-    --indigo-dim:#1E1C38;
+    --indigo-dim:#0A2E25;
     --coral-dim:#2A1A1A;
     --mint-dim:#0F2520;
     --amber-dim:#2A2010;
@@ -100,7 +100,7 @@ body{
   padding-top:calc(14px + env(safe-area-inset-top));
   display:flex;align-items:center;justify-content:space-between;
   flex-shrink:0;
-  box-shadow:0 1px 0 var(--border), 0 4px 16px rgba(91,79,233,0.06);
+  box-shadow:0 1px 0 var(--border), 0 4px 16px rgba(29,158,117,0.06);
   position:relative;
 }
 .navbar::after{
@@ -128,7 +128,7 @@ body{
   border-top:1px solid var(--border);
   display:flex;
   padding-bottom:env(safe-area-inset-bottom);
-  box-shadow:0 -4px 20px rgba(91,79,233,0.08);
+  box-shadow:0 -4px 20px rgba(29,158,117,0.08);
 }
 .tabbar-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;
@@ -157,7 +157,7 @@ body{
   background:var(--surface);
   border-radius:var(--radius-lg);
   padding:14px 16px;
-  box-shadow:0 2px 8px rgba(91,79,233,0.07);
+  box-shadow:0 2px 8px rgba(29,158,117,0.07);
   border:1px solid var(--border);
   position:relative;overflow:hidden;
 }
@@ -192,7 +192,7 @@ body{
   background:var(--indigo);
   color:#fff;
   border-color:var(--indigo);
-  box-shadow:0 2px 8px rgba(91,79,233,0.3);
+  box-shadow:0 2px 8px rgba(29,158,117,0.3);
 }
 
 /* ── Recherche ── */
@@ -235,7 +235,7 @@ body{
   border-radius:var(--radius-lg);
   padding:16px;
   margin-bottom:12px;
-  box-shadow:0 2px 8px rgba(91,79,233,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  box-shadow:0 2px 8px rgba(29,158,117,0.07), 0 1px 2px rgba(0,0,0,0.04);
   transition:box-shadow .2s, transform .15s;
   position:relative;
   overflow:hidden;
@@ -248,7 +248,7 @@ body{
 .icard[data-prio="Modéré"]::before{background:var(--amber)}
 .icard[data-prio="Mineur"]::before{background:var(--mint)}
 .icard.resolved::before{background:var(--mint);opacity:0.4}
-.icard:active{transform:scale(0.99);box-shadow:0 1px 3px rgba(91,79,233,0.05)}
+.icard:active{transform:scale(0.99);box-shadow:0 1px 3px rgba(29,158,117,0.05)}
 .icard.resolved{opacity:.52;filter:grayscale(0.25)}
 .icard.souffrance{border-color:rgba(245,158,11,0.3);box-shadow:0 2px 8px rgba(245,158,11,0.12)}
 
@@ -264,7 +264,7 @@ body{
 .b-modere{background:#FFF3CD;color:#9A6700}
 .b-mineur{background:#E8F4FF;color:#1A6FA8}
 .b-ouvert{background:var(--surface2);color:var(--text2)}
-.b-encours{background:#EEEDFE;color:#4B44C4}
+.b-encours{background:#E1F5EE;color:#085041}
 .b-resolu{background:#E8FAF2;color:#1A7A52}
 .b-rh{background:#FDE8F0;color:#A3245A}
 .b-orga{background:#FFF3CD;color:#9A6700}
@@ -308,16 +308,16 @@ body{
   transition:background .15s;
   border-radius:inherit;
 }
-.btn-action:hover{background:var(--surface);border-color:var(--indigo);color:var(--text);box-shadow:0 2px 8px rgba(91,79,233,0.1)}
+.btn-action:hover{background:var(--surface);border-color:var(--indigo);color:var(--text);box-shadow:0 2px 8px rgba(29,158,117,0.1)}
 .btn-action:active{opacity:.7;transform:scale(0.97);box-shadow:none}
 .btn-action.ok{color:var(--mint);border-color:rgba(29,184,138,0.4);background:var(--mint-dim)}
 .btn-action.ok:hover{background:rgba(29,184,138,0.15);border-color:var(--mint);box-shadow:0 2px 8px rgba(29,184,138,0.15)}
 .btn-action.danger{color:var(--coral);border-color:rgba(255,95,95,0.4);background:var(--coral-dim)}
 .btn-action.danger:hover{background:rgba(255,95,95,0.12);border-color:var(--coral);box-shadow:0 2px 8px rgba(255,95,95,0.12)}
-.btn-action.resolve{color:var(--indigo);border-color:rgba(91,79,233,0.4);background:var(--indigo-dim);font-weight:600}
-.btn-action.resolve:hover{background:rgba(91,79,233,0.15);border-color:var(--indigo);box-shadow:0 2px 8px rgba(91,79,233,0.15)}
-.btn-action.primary{background:var(--indigo);color:#fff;border-color:var(--indigo);box-shadow:0 2px 8px rgba(91,79,233,0.3)}
-.btn-action.primary:hover{background:var(--indigo-light);box-shadow:0 4px 14px rgba(91,79,233,0.35)}
+.btn-action.resolve{color:var(--indigo);border-color:rgba(29,158,117,0.4);background:var(--indigo-dim);font-weight:600}
+.btn-action.resolve:hover{background:rgba(29,158,117,0.15);border-color:var(--indigo);box-shadow:0 2px 8px rgba(29,158,117,0.15)}
+.btn-action.primary{background:var(--indigo);color:#fff;border-color:var(--indigo);box-shadow:0 2px 8px rgba(29,158,117,0.3)}
+.btn-action.primary:hover{background:var(--indigo-light);box-shadow:0 4px 14px rgba(29,158,117,0.35)}
 .btn-action.primary:active{box-shadow:none}
 
 /* ── Section étendue ── */
@@ -457,7 +457,7 @@ textarea.form-input{resize:none;min-height:72px;line-height:1.5}
   font-size:16px;font-weight:700;
   cursor:pointer;margin-bottom:10px;
   font-family:'Syne',sans-serif;letter-spacing:0.2px;
-  box-shadow:0 4px 14px rgba(91,79,233,0.35);
+  box-shadow:0 4px 14px rgba(29,158,117,0.35);
   transition:all .2s;
 }
 .btn-submit:active{opacity:.85;transform:scale(0.98);box-shadow:none}
@@ -552,7 +552,7 @@ textarea.form-input{resize:none;min-height:72px;line-height:1.5}
   border-radius:var(--radius);padding:12px;
   font-size:15px;font-weight:700;cursor:pointer;
   font-family:'Syne',sans-serif;
-  box-shadow:0 3px 10px rgba(91,79,233,0.3);
+  box-shadow:0 3px 10px rgba(29,158,117,0.3);
   transition:all .2s;
 }
 .btn-bilan:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
@@ -623,12 +623,14 @@ textarea.form-input{resize:none;min-height:72px;line-height:1.5}
 <!-- CONFIG -->
 <div class="screen" id="screen-config">
   <div class="navbar"><h1 style="display:flex;align-items:center;gap:8px"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-  <rect width="28" height="28" rx="8" fill="#5B4FE9"/>
-  <polyline points="3,14 8,14 10,8 12,20 15,5 17,19 19,12 25,12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect width="28" height="28" rx="8" fill="#1D9E75"/>
+  <path d="M14 4 C14 4 8 11 8 17 C8 20.3 10.7 23 14 23 C17.3 23 20 20.3 20 17 C20 11 14 4 14 4Z" fill="white" opacity="0.9"/>
+  <circle cx="14" cy="17" r="2.5" fill="#1D9E75"/>
+  <path d="M14 8 L14 13" stroke="#1D9E75" stroke-width="1.8" stroke-linecap="round"/>
 </svg> Configuration</h1></div>
   <div class="form-scroll">
     <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
-      Pour activer l'analyse intelligente et les suggestions dans Pulse, saisissez votre clé API Anthropic. Elle est stockée uniquement sur votre téléphone.
+      Pour activer l'analyse intelligente et les suggestions dans ManAlert, saisissez votre clé API Anthropic. Elle est stockée uniquement sur votre téléphone.
     </div>
     <div class="form-section">
       <div class="form-row">
@@ -646,12 +648,14 @@ textarea.form-input{resize:none;min-height:72px;line-height:1.5}
 <!-- LOGIN -->
 <div class="screen" id="screen-login">
   <div class="navbar"><h1 style="display:flex;align-items:center;gap:8px"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-  <rect width="28" height="28" rx="8" fill="#5B4FE9"/>
-  <polyline points="3,14 8,14 10,8 12,20 15,5 17,19 19,12 25,12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-</svg> Pulse</h1></div>
+  <rect width="28" height="28" rx="8" fill="#1D9E75"/>
+  <path d="M14 4 C14 4 8 11 8 17 C8 20.3 10.7 23 14 23 C17.3 23 20 20.3 20 17 C20 11 14 4 14 4Z" fill="white" opacity="0.9"/>
+  <circle cx="14" cy="17" r="2.5" fill="#1D9E75"/>
+  <path d="M14 8 L14 13" stroke="#1D9E75" stroke-width="1.8" stroke-linecap="round"/>
+</svg> ManAlert</h1></div>
   <div class="form-scroll">
     <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
-      Connectez-vous pour accéder à Pulse.
+      Connectez-vous pour accéder à ManAlert.
     </div>
     <div class="form-section">
       <div class="form-row">
@@ -699,10 +703,12 @@ textarea.form-input{resize:none;min-height:72px;line-height:1.5}
   <div class="navbar">
     <h1 style="display:flex;align-items:center;gap:8px">
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-  <rect width="28" height="28" rx="8" fill="#5B4FE9"/>
-  <polyline points="3,14 8,14 10,8 12,20 15,5 17,19 19,12 25,12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect width="28" height="28" rx="8" fill="#1D9E75"/>
+  <path d="M14 4 C14 4 8 11 8 17 C8 20.3 10.7 23 14 23 C17.3 23 20 20.3 20 17 C20 11 14 4 14 4Z" fill="white" opacity="0.9"/>
+  <circle cx="14" cy="17" r="2.5" fill="#1D9E75"/>
+  <path d="M14 8 L14 13" stroke="#1D9E75" stroke-width="1.8" stroke-linecap="round"/>
 </svg>
-      Pulse
+      ManAlert
     </h1>
     <div style="display:flex;gap:8px;align-items:center">
       <button onclick="doLogout()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;color:var(--text2);padding:7px 9px;line-height:1;display:inline-flex;align-items:center;justify-content:center" title="Déconnexion"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -764,8 +770,10 @@ textarea.form-input{resize:none;min-height:72px;line-height:1.5}
 <div class="screen" id="screen-analyse">
   <div class="navbar">
     <h1 style="display:flex;align-items:center;gap:8px"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-  <rect width="28" height="28" rx="8" fill="#5B4FE9"/>
-  <polyline points="3,14 8,14 10,8 12,20 15,5 17,19 19,12 25,12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect width="28" height="28" rx="8" fill="#1D9E75"/>
+  <path d="M14 4 C14 4 8 11 8 17 C8 20.3 10.7 23 14 23 C17.3 23 20 20.3 20 17 C20 11 14 4 14 4Z" fill="white" opacity="0.9"/>
+  <circle cx="14" cy="17" r="2.5" fill="#1D9E75"/>
+  <path d="M14 8 L14 13" stroke="#1D9E75" stroke-width="1.8" stroke-linecap="round"/>
 </svg> Analyse</h1>
   </div>
   <!-- Onglets internes -->
@@ -826,7 +834,7 @@ textarea.form-input{resize:none;min-height:72px;line-height:1.5}
       </div>
       <div id="bilan-result" style="display:none">
         <div class="pdf-header" style="display:none;margin-bottom:16px;border-bottom:2px solid #007AFF;padding-bottom:10px">
-          <div style="font-size:18px;font-weight:700;color:#1a1a1a">Pulse — Bilan Centre de Dialyse</div>
+          <div style="font-size:18px;font-weight:700;color:#1a1a1a">ManAlert — Bilan Centre de Dialyse</div>
           <div id="pdf-periode" style="font-size:13px;color:#666;margin-top:4px"></div>
           <div id="pdf-date-gen" style="font-size:11px;color:#999;margin-top:2px"></div>
         </div>
@@ -880,7 +888,7 @@ textarea.form-input{resize:none;min-height:72px;line-height:1.5}
       <button class="btn-cancel" onclick="goTo('liste')">Annuler</button>
     </div>
     <div id="step-fiche" style="display:none">
-      <div id="analyse-loading" style="text-align:center;padding:30px;color:var(--text2);font-size:14px;display:none">Pulse analyse...</div>
+      <div id="analyse-loading" style="text-align:center;padding:30px;color:var(--text2);font-size:14px;display:none">ManAlert analyse...</div>
       <div id="fiche-editee">
         <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.5">Fiche générée — vérifiez et modifiez avant d'enregistrer.</div>
         <div class="form-section">
@@ -1303,7 +1311,7 @@ function renderStats(){
   const enc=issues.filter(i=>i.statut==='En cours').length;
   const rh=issues.filter(i=>i.categorie==='Ressources Humaines'&&i.statut!=='Résolu').length;
   document.getElementById('stats-bar').innerHTML=`
-    <div class="stat"><div class="stat-bubble1" style="background:#5B4FE9"></div><div class="stat-bubble2" style="background:#5B4FE9"></div><div class="stat-label">Total</div><div class="stat-value" style="color:#5B4FE9">${tot}</div></div>
+    <div class="stat"><div class="stat-bubble1" style="background:#1D9E75"></div><div class="stat-bubble2" style="background:#1D9E75"></div><div class="stat-label">Total</div><div class="stat-value" style="color:#1D9E75">${tot}</div></div>
     <div class="stat"><div class="stat-bubble1" style="background:#F59E0B"></div><div class="stat-bubble2" style="background:#F59E0B"></div><div class="stat-label">Ouverts</div><div class="stat-value" style="color:#F59E0B">${ouv}</div></div>
     <div class="stat"><div class="stat-bubble1" style="background:#1DB88A"></div><div class="stat-bubble2" style="background:#1DB88A"></div><div class="stat-label">En cours</div><div class="stat-value" style="color:#1DB88A">${enc}</div></div>
     <div class="stat"><div class="stat-bubble1" style="background:#FF5F5F"></div><div class="stat-bubble2" style="background:#FF5F5F"></div><div class="stat-label">RH actifs</div><div class="stat-value" style="color:#FF5F5F">${rh}</div></div>`;
@@ -1694,7 +1702,7 @@ async function analyserSaisie(){
   const texte=document.getElementById('f-saisie-libre').value.trim();
   if(!texte){document.getElementById('f-saisie-libre').focus();return;}
   const btn=document.getElementById('btn-analyser');
-  btn.textContent='Pulse analyse...';
+  btn.textContent='ManAlert analyse...';
   btn.disabled=true;
   const today=td();
   const prompt=`Tu es un assistant d'un responsable de centre de dialyse. Il te décrit une situation terrain. Tu dois uniquement reformuler ce qu'il dit de façon claire et neutre, sans interpréter, sans ajouter de conclusions, sans recommandations.
