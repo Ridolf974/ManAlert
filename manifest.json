@@ -1,11 +1,11 @@
 {
-  "name": "Pulse",
-  "short_name": "Pulse",
+  "name": "ManAlert",
+  "short_name": "ManAlert",
   "description": "Suivi des problématiques terrain — Centre de dialyse",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#F4F5FF",
-  "theme_color": "#5B4FE9",
+  "theme_color": "#1D9E75",
   "orientation": "portrait",
   "icons": [
     {
