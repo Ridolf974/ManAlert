@@ -2242,7 +2242,9 @@ function exportIssuePDF(id){
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'DM Sans',system-ui,sans-serif;color:#1A1830;line-height:1.6;background:#fff}
-.page{max-width:700px;margin:0 auto;padding:32px 28px}
+.page{width:595px;margin:0 auto;padding:28px 24px}
+div,table,tr{page-break-inside:avoid}
+.section{page-break-inside:avoid}
 .toolbar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #E8E8E8;padding:12px 24px;display:flex;justify-content:center;gap:12px;box-shadow:0 -2px 12px rgba(0,0,0,0.08);z-index:100}
 .toolbar button{border-radius:10px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:'Syne',sans-serif}
 .btn-dl{background:#1D9E75;color:#fff}
@@ -2263,7 +2265,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#1A1830;line-height:1.6;ba
     <div style="text-align:right;font-size:11px;color:#888;line-height:1.6">Fiche n°${i.id}<br>Générée le ${new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})}</div>
   </div>
 
-  <div style="margin-bottom:24px">
+  <div class="section" style="margin-bottom:24px">
     <div style="font-family:Syne,sans-serif;font-size:22px;font-weight:700;line-height:1.3;margin-bottom:12px">${esc(i.titre)}</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <span style="display:inline-flex;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.3px;background:#E8FAF2;color:${statusColor}">${i.statut}</span>
@@ -2287,12 +2289,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#1A1830;line-height:1.6;ba
     </tr>
   </table>
 
-  ${i.desc?`<div style="margin-bottom:24px">
+  ${i.desc?`<div class="section" style="margin-bottom:24px">
     <div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid #E8F5EE;text-transform:uppercase;letter-spacing:0.5px">Description</div>
     <div style="font-size:14px;color:#333;line-height:1.7;background:#FAFBFF;border:1px solid #E8E8E8;border-radius:10px;padding:16px 20px">${esc(i.desc)}</div>
   </div>`:''}
 
-  ${i.resolution?`<div style="margin-bottom:24px">
+  ${i.resolution?`<div class="section" style="margin-bottom:24px">
     <div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid #E8F5EE;text-transform:uppercase;letter-spacing:0.5px">Résolution</div>
     <div style="background:#E8FAF2;border:1px solid #C3EDDB;border-radius:10px;padding:18px 20px">
       <div style="font-size:11px;font-weight:700;color:#1D9E75;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">✓ Problème résolu</div>
@@ -2301,7 +2303,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#1A1830;line-height:1.6;ba
     </div>
   </div>`:''}
 
-  <div style="margin-bottom:24px">
+  <div class="section" style="margin-bottom:24px">
     <div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid #E8F5EE;text-transform:uppercase;letter-spacing:0.5px">Remarques (${(i.notes||[]).length})</div>
     ${(i.notes||[]).length?`<table style="width:100%;border-collapse:collapse;border:1px solid #E8E8E8;overflow:hidden">
       <thead><tr><th style="background:#F7F8FC;padding:10px 14px;font-size:10px;font-weight:700;color:#1D9E75;text-transform:uppercase;letter-spacing:0.5px;text-align:left;border-bottom:2px solid #E8E8E8;width:100px">Date</th><th style="background:#F7F8FC;padding:10px 14px;font-size:10px;font-weight:700;color:#1D9E75;text-transform:uppercase;letter-spacing:0.5px;text-align:left;border-bottom:2px solid #E8E8E8">Remarque</th></tr></thead>
@@ -2309,7 +2311,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#1A1830;line-height:1.6;ba
     </table>`:`<div style="font-size:13px;color:#999;font-style:italic;padding:16px">Aucune remarque enregistrée.</div>`}
   </div>
 
-  ${rhsRows?`<div style="margin-bottom:24px">
+  ${rhsRows?`<div class="section" style="margin-bottom:24px">
     <div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid #E8F5EE;text-transform:uppercase;letter-spacing:0.5px">Pistes de résolution</div>
     ${rhsRows}
   </div>`:''}
@@ -2334,10 +2336,10 @@ function doExport(){
   btn.disabled=true;btn.textContent='Export en cours...';
   var el=document.getElementById('pdf-content');
   html2pdf().set({
-    margin:[12,10,12,10],
+    margin:[10,10,10,10],
     filename:_filename,
     image:{type:'jpeg',quality:0.98},
-    html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',width:595,windowWidth:595},
     jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
     pagebreak:{mode:['avoid-all','css','legacy']}
   }).from(el).save().then(function(){
