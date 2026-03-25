@@ -182,13 +182,13 @@ body{
 }
 .stat-bubble1{
   position:absolute;top:-18px;right:-18px;
-  width:70px;height:70px;border-radius:50%;
-  opacity:0.18;pointer-events:none;
+  width:72px;height:72px;border-radius:50%;
+  opacity:0.22;pointer-events:none;
 }
 .stat-bubble2{
-  position:absolute;bottom:-24px;right:8px;
-  width:44px;height:44px;border-radius:50%;
-  opacity:0.1;pointer-events:none;
+  position:absolute;bottom:-22px;right:10px;
+  width:46px;height:46px;border-radius:50%;
+  opacity:0.14;pointer-events:none;
 }
 .stat-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
 .stat-value{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;line-height:1}
@@ -1320,10 +1320,10 @@ function renderStats(){
   const enc=issues.filter(i=>i.statut==='En cours').length;
   const rh=issues.filter(i=>i.categorie==='Ressources Humaines'&&i.statut!=='Résolu').length;
   document.getElementById('stats-bar').innerHTML=`
-    <div class="stat"><div class="stat-bubble1" style="background:var(--indigo)"></div><div class="stat-bubble2" style="background:var(--indigo)"></div><div class="stat-label">Total</div><div class="stat-value" style="color:var(--indigo)">${tot}</div></div>
-    <div class="stat"><div class="stat-bubble1" style="background:var(--amber)"></div><div class="stat-bubble2" style="background:var(--amber)"></div><div class="stat-label">Ouverts</div><div class="stat-value" style="color:var(--amber)">${ouv}</div></div>
-    <div class="stat"><div class="stat-bubble1" style="background:var(--indigo-light)"></div><div class="stat-bubble2" style="background:var(--indigo-light)"></div><div class="stat-label">En cours</div><div class="stat-value" style="color:var(--indigo-light)">${enc}</div></div>
-    <div class="stat"><div class="stat-bubble1" style="background:var(--coral)"></div><div class="stat-bubble2" style="background:var(--coral)"></div><div class="stat-label">RH actifs</div><div class="stat-value" style="color:var(--coral)">${rh}</div></div>`;
+    <div class="stat"><div class="stat-bubble1" style="background:#5B4FE9"></div><div class="stat-bubble2" style="background:#5B4FE9"></div><div class="stat-label">Total</div><div class="stat-value" style="color:#5B4FE9">${tot}</div></div>
+    <div class="stat"><div class="stat-bubble1" style="background:#F59E0B"></div><div class="stat-bubble2" style="background:#F59E0B"></div><div class="stat-label">Ouverts</div><div class="stat-value" style="color:#F59E0B">${ouv}</div></div>
+    <div class="stat"><div class="stat-bubble1" style="background:#1DB88A"></div><div class="stat-bubble2" style="background:#1DB88A"></div><div class="stat-label">En cours</div><div class="stat-value" style="color:#1DB88A">${enc}</div></div>
+    <div class="stat"><div class="stat-bubble1" style="background:#FF5F5F"></div><div class="stat-bubble2" style="background:#FF5F5F"></div><div class="stat-label">RH actifs</div><div class="stat-value" style="color:#FF5F5F">${rh}</div></div>`;
 }
 
 function renderList(){
