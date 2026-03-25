@@ -1265,7 +1265,26 @@ function renderList(){
   });
   const so={Ouvert:0,'En cours':1,Résolu:2};
   const po={Critique:0,Modéré:1,Mineur:2};
-  list.sort((a,b)=>(so[a.statut]||0)-(so[b.statut]||0)||(po[a.priorite]||1)-(po[b.priorite]||1));
+  list.sort((a,b)=>{
+    // 1. Groupe par statut : Ouvert → En cours → Résolu
+    const sd=(so[a.statut]||0)-(so[b.statut]||0);
+    if(sd!==0)return sd;
+    // 2. Dans le groupe Résolu : tri par date de résolution décroissante (le plus récent en haut)
+    if(a.statut==='Résolu'&&b.statut==='Résolu'){
+      const da=a.resolution?.dateTs||a.resolution?.date||a.cree||'';
+      const db=b.resolution?.dateTs||b.resolution?.date||b.cree||'';
+      if(da>db)return -1;
+      if(da<db)return 1;
+      return (b.id||0)-(a.id||0);
+    }
+    // 3. Dans les autres groupes : tri par date de création décroissante (la plus récente en haut)
+    const ca=a.creeTs||a.cree||'';
+    const cb=b.creeTs||b.cree||'';
+    if(ca>cb)return -1;
+    if(ca<cb)return 1;
+    // 4. Puis par priorité si même date
+    return (po[a.priorite]||1)-(po[b.priorite]||1);
+  });
   const el=document.getElementById('issues-list');
   if(!list.length){
     el.innerHTML='<div class="empty"><div class="empty-icon">✅</div>Aucune problématique ici.</div>';
@@ -1438,7 +1457,7 @@ function confirmerAvecReformulation(id){
   const i=issues.find(x=>x.id===id);if(!i)return;
   const texte=reformulations[id]||document.getElementById('res-'+id)?.value.trim()||'Résolution non précisée.';
   i.statut='Résolu';i.fin=td();
-  i.resolution={texte,date:td()};
+  i.resolution={texte,date:td(),dateTs:new Date().toISOString()};
   delete resolving[id];delete reformulations[id];
   save();renderList();renderStats();
 }
@@ -1660,6 +1679,7 @@ Règles :
     fin:'',
     notes:[],
     cree:today,
+    creeTs:new Date().toISOString(),
     rhs:null,
     resolution:null
   });
@@ -1743,6 +1763,7 @@ function saveIssue(){
     fin:document.getElementById('f-fin').value,
     notes:note?[{date:td(),texte:note}]:[],
     cree:td(),
+    creeTs:new Date().toISOString(),
     rhs:null,
     resolution:null
   });
