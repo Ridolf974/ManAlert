@@ -2370,7 +2370,11 @@ function exportIssuePDF(id){
   </div>
 
 </div>
-<script>window.onload=function(){window.print();}<\/script>
+<div class="no-print" style="position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #E8E8E8;padding:12px 24px;display:flex;justify-content:center;gap:12px;box-shadow:0 -2px 12px rgba(0,0,0,0.08)">
+  <button onclick="window.print()" style="background:#1D9E75;color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;letter-spacing:0.2px">Imprimer / Enregistrer en PDF</button>
+  <button onclick="window.close()" style="background:#F0F1FA;color:#5A5878;border:1px solid #E8E8E8;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer">Fermer</button>
+</div>
+<style>.no-print+*{padding-bottom:70px}@media print{.no-print{display:none!important}}</style>
 </body>
 </html>`;
 
