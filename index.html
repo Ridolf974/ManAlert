@@ -364,6 +364,19 @@ body{
 .resolution-banner-text{font-size:13px;color:var(--text2);line-height:1.5}
 .resolution-banner-date{font-size:11px;color:var(--mint);margin-top:3px;font-weight:500}
 
+/* Connection indicator */
+.fb-connection-badge{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9999;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;display:none;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,0.2);transition:opacity 0.3s}
+.fb-connection-badge.offline{display:flex;background:#A32D2D;color:#fff}
+.fb-connection-badge.online{display:flex;background:var(--mint);color:#fff;animation:fadeOutBadge 2s forwards}
+.fb-connection-badge .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+@keyframes fadeOutBadge{0%,70%{opacity:1}100%{opacity:0;display:none}}
+
+/* Toast notification */
+.fb-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:500;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.25);opacity:0;transition:opacity 0.3s;pointer-events:none}
+.fb-toast.error{background:#A32D2D}
+.fb-toast.success{background:var(--mint)}
+.fb-toast.visible{opacity:1}
+
 .resolve-prompt{
   background:var(--mint-dim);
   border:1px solid rgba(29,184,138,0.25);
@@ -697,6 +710,10 @@ textarea.form-input{resize:none;min-height:72px;line-height:1.5}
     <button class="btn-submit" id="btn-register" onclick="doRegister()">Créer le compte</button>
   </div>
 </div>
+
+<!-- Connection & sync indicators -->
+<div id="fb-connection-badge" class="fb-connection-badge"><span class="dot"></span><span id="fb-connection-text">Hors ligne</span></div>
+<div id="fb-toast" class="fb-toast"></div>
 
 <!-- LISTE -->
 <div class="screen active" id="screen-liste">
@@ -1070,6 +1087,37 @@ const firebaseConfig = {
 
 let db = null;
 let fbRef = null;
+let _fbConnected = false;
+let _pendingWrites = 0;
+
+// Toast notification helper
+function showFbToast(msg, type='error', duration=3500){
+  const el=document.getElementById('fb-toast');
+  if(!el) return;
+  el.textContent=msg;
+  el.className='fb-toast '+type+' visible';
+  clearTimeout(el._timer);
+  el._timer=setTimeout(()=>{el.classList.remove('visible');},duration);
+}
+
+// Connection state monitoring
+function startConnectionMonitor(){
+  const connRef=firebase.database().ref('.info/connected');
+  const badge=document.getElementById('fb-connection-badge');
+  const badgeText=document.getElementById('fb-connection-text');
+  connRef.on('value', snap=>{
+    const connected=snap.val()===true;
+    _fbConnected=connected;
+    if(!badge) return;
+    if(connected){
+      badge.className='fb-connection-badge online';
+      badgeText.textContent='Connecté';
+    } else {
+      badge.className='fb-connection-badge offline';
+      badgeText.textContent='Hors ligne — données sauvées localement';
+    }
+  });
+}
 
 // ===== AUTHENTIFICATION =====
 function showLogin(){
@@ -1120,6 +1168,9 @@ function doLogout(){
   if(fbRef){try{fbRef.off();}catch(e){}}
   fbRef = null;
   db = null;
+  _pendingWrites = 0;
+  const badge=document.getElementById('fb-connection-badge');
+  if(badge) badge.className='fb-connection-badge';
   issues = [];
   exp={}; resolving={}; Object.keys(editingResolu).forEach(k=>delete editingResolu[k]);
   searchQuery=''; masquerResolus=false;
@@ -1135,7 +1186,12 @@ function initFirebase(){
   try {
     if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-    // Écouter l'état de connexion
+    // Activer la persistance hors-ligne Firebase
+    try{ firebase.database().goOnline(); } catch(e){}
+
+    // Surveiller l'état de connexion
+    startConnectionMonitor();
+
     firebase.auth().onAuthStateChanged(user => {
       if(user){
         // Connecté — charger les données de cet utilisateur
@@ -1166,18 +1222,27 @@ function startFirebaseSync(){
     let fbInitialized = false;
     fbRef.on('value', snap => {
       const data = snap.val();
-      if(data && typeof data === 'object' && Object.keys(data).length > 0){
-        const loaded = Object.values(data).filter(Boolean);
-        loaded.sort((a,b)=>(a.id||0)-(b.id||0));
-        issues = loaded;
+      const remoteIssues = (data && typeof data === 'object' && Object.keys(data).length > 0)
+        ? Object.values(data).filter(Boolean) : [];
+
+      if(remoteIssues.length > 0){
+        // Merge : garder les issues locales non présentes dans Firebase
+        const remoteIds = new Set(remoteIssues.map(i=>i.id));
+        const localOnly = issues.filter(i=>i&&i.id&&!remoteIds.has(i.id));
+        const merged = [...remoteIssues, ...localOnly];
+        merged.sort((a,b)=>(a.id||0)-(b.id||0));
+        issues = merged;
         fixRhsFields();
         try{localStorage.setItem(KEY,JSON.stringify(issues));}catch(e){}
+        // Si on avait des issues locales non présentes, les pousser
+        if(localOnly.length > 0) pushToFirebase();
         renderList();
         renderStats();
         if(document.getElementById('screen-analyse').classList.contains('active')){
           renderAnalyse();
         }
       } else if(!fbInitialized && issues.length > 0){
+        // Firebase vide, on a des données locales — les envoyer
         pushToFirebase();
       }
       fbInitialized = true;
@@ -1204,7 +1269,16 @@ function pushToFirebase(){
   if(!fbRef||!issues.length)return;
   const obj={};
   issues.forEach(i=>{ if(i&&i.id) obj['issue_'+i.id]=i; });
-  fbRef.set(obj).catch(e=>console.log('Firebase sync error:',e));
+  _pendingWrites++;
+  fbRef.set(obj)
+    .then(()=>{
+      _pendingWrites=Math.max(0,_pendingWrites-1);
+    })
+    .catch(e=>{
+      _pendingWrites=Math.max(0,_pendingWrites-1);
+      console.log('Firebase sync error:',e);
+      showFbToast('Echec de sauvegarde cloud — données gardées localement','error');
+    });
 }
 function save(){
   try{localStorage.setItem(KEY,JSON.stringify(issues));}catch(e){}
@@ -2158,6 +2232,14 @@ if('serviceWorker' in navigator){
 
 load();
 setTimeout(initFirebase, 200);
+
+// Avertir si des écritures sont en cours lors de la fermeture
+window.addEventListener('beforeunload', e=>{
+  if(_pendingWrites > 0){
+    e.preventDefault();
+    e.returnValue='Des données sont en cours de sauvegarde. Voulez-vous vraiment quitter ?';
+  }
+});
 // La gestion d'accès est gérée par Firebase Auth
 </script>
 
