@@ -12,8 +12,10 @@ import os
 
 # ============================================================
 # CONFIGURATION
+# Définir la variable d'environnement avant d'exécuter :
+#   export GITHUB_TOKEN="ghp_votre_token_ici"
 # ============================================================
-GITHUB_TOKEN = "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"
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 GITHUB_USER  = "ridolf974"
 GITHUB_REPO  = "tracker-problematiques"
 BRANCH       = "main"
@@ -64,6 +66,10 @@ def push_file(local_path, remote_path, message):
         return False
 
 def main():
+    if not GITHUB_TOKEN:
+        print("ERREUR : variable d'environnement GITHUB_TOKEN non définie.")
+        print("  export GITHUB_TOKEN=\"ghp_votre_token_ici\"")
+        return
     print("=" * 50)
     print("Déploiement Pulse")
     print("=" * 50)

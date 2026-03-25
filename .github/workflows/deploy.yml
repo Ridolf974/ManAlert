@@ -1,0 +1,27 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Déclenchement manuel depuis l'onglet "Actions" sur GitHub
+  workflow_dispatch:
+
+  # Déclenchement automatique à chaque push sur main
+  push:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'manifest.json'
+      - 'sw.js'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Déploiement vers GitHub Pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: python3 deploy.py
