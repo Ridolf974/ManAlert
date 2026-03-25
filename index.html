@@ -10,25 +10,6 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyChCsw7FTECYVmsEGG4O6iowDMoSgJdiCg",
-    authDomain: "pulse-dialyse.firebaseapp.com",
-    databaseURL: "https://pulse-dialyse-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "pulse-dialyse",
-    storageBucket: "pulse-dialyse.firebasestorage.app",
-    messagingSenderId: "617504338844",
-    appId: "1:617504338844:web:e0b9d9781a2b66498a4e59"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // Module Firebase v10 chargé (SDK compat utilisé pour auth+db)
-</script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
